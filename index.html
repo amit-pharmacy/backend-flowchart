@@ -5,14 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vivamen — Pharmacy Backend Flowchart</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e0e0e0; display: flex; height: 100vh; overflow: hidden; }
 
   /* Hamburger button — hidden on desktop */
   .hamburger { display: none; position: fixed; top: 12px; left: 12px; z-index: 310; background: #1a1d27; border: 1px solid #2a2d3a; color: #e0e0e0; width: 44px; height: 44px; border-radius: 8px; cursor: pointer; font-size: 22px; line-height: 44px; text-align: center; -webkit-tap-highlight-color: transparent; }
-
-  /* Sidebar overlay backdrop — mobile only */
   .nav-backdrop { display: none; }
 
   /* Sidebar */
@@ -30,9 +29,15 @@
   main { flex: 1; overflow-y: auto; padding: 30px 40px; }
   .phase { display: none; }
   .phase.active { display: block; }
-  .phase h2 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .phase-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 12px; }
+  .phase h2 { font-size: 22px; font-weight: 700; color: #fff; }
   .phase .phase-desc { font-size: 14px; color: #888; margin-bottom: 24px; line-height: 1.5; }
   .phase .phase-desc strong { color: #b0b0b0; }
+
+  /* PDF Export button */
+  .pdf-btn { background: #22253a; border: 1px solid #3a3d4a; color: #e0e0e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; }
+  .pdf-btn:hover { background: #2a3a5a; border-color: #60a5fa; color: #fff; }
+  .pdf-btn.exporting { opacity: 0.5; pointer-events: none; }
 
   /* Diagram container */
   .diagram-wrap { background: #fff; border-radius: 12px; padding: 30px; margin-bottom: 24px; overflow-x: auto; cursor: grab; position: relative; -webkit-overflow-scrolling: touch; }
@@ -50,6 +55,10 @@
   .annotation .highlight { color: #fbbf24; font-weight: 600; }
   .annotation .warn { color: #f87171; font-weight: 600; }
 
+  /* Sub-phase labels (A / B) */
+  .sub-phase-label { display: inline-block; background: #1e3a5f; color: #60a5fa; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 6px; margin: 24px 0 12px; letter-spacing: 0.5px; }
+  .sub-phase-label.variant-b { background: #3b1f5e; color: #a78bfa; }
+
   /* Tables */
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; }
   .ref-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
@@ -61,6 +70,7 @@
   .badge-red { background: #7f1d1d20; color: #f87171; }
   .badge-orange { background: #78350f20; color: #fbbf24; }
   .badge-blue { background: #1e3a5f40; color: #60a5fa; }
+  .badge-purple { background: #3b1f5e40; color: #a78bfa; }
 
   /* Presentation controls */
   .pres-controls { position: fixed; bottom: 20px; right: 30px; display: flex; gap: 8px; z-index: 100; }
@@ -69,73 +79,24 @@
   .pres-controls .page-indicator { background: none; border: none; color: #666; cursor: default; padding: 10px 6px; }
   .pres-controls .page-indicator:hover { background: none; border: none; }
 
-  /* Fullscreen diagram */
-  .fullscreen-overlay { display: none; position: fixed; inset: 0; background: #fff; z-index: 200; overflow: auto; padding: 40px; }
-  .fullscreen-overlay.show { display: block; }
-  .fullscreen-overlay .close-btn { position: fixed; top: 16px; right: 20px; background: #1a1d27; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; z-index: 201; }
-
   /* ==================== MOBILE / TABLET ==================== */
   @media (max-width: 768px) {
     body { flex-direction: column; overflow: hidden; }
-
-    /* Show hamburger */
     .hamburger { display: block; }
-
-    /* Sidebar becomes a slide-over drawer */
-    nav {
-      position: fixed; top: 0; left: 0; bottom: 0;
-      width: 280px; min-width: 280px;
-      z-index: 300;
-      transform: translateX(-100%);
-      transition: transform 0.25s ease;
-      padding-top: 20px;
-    }
+    nav { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; min-width: 280px; z-index: 300; transform: translateX(-100%); transition: transform 0.25s ease; padding-top: 20px; }
     nav.open { transform: translateX(0); }
-
-    /* Dark backdrop behind the drawer */
-    .nav-backdrop {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 299;
-    }
+    .nav-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 299; }
     .nav-backdrop.show { display: block; }
-
-    /* Main content takes full width, offset for hamburger */
-    main {
-      flex: 1;
-      padding: 68px 16px 80px 16px;
-      overflow-y: auto;
-      width: 100%;
-    }
-
-    /* Smaller headings */
+    main { flex: 1; padding: 68px 16px 80px 16px; overflow-y: auto; width: 100%; }
     .phase h2 { font-size: 18px; }
     .phase .phase-desc { font-size: 13px; }
-
-    /* Diagrams: allow horizontal scroll, tighter padding */
-    .diagram-wrap {
-      padding: 16px;
-      border-radius: 8px;
-      -webkit-overflow-scrolling: touch;
-    }
+    .diagram-wrap { padding: 16px; border-radius: 8px; }
     .diagram-wrap svg { max-width: none; min-width: 400px; }
     .diagram-wrap .zoom-hint { display: none; }
-
-    /* Annotations: tighter */
     .annotation { padding: 16px; border-radius: 8px; }
-
-    /* Presentation controls: full-width bottom bar */
-    .pres-controls {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: #1a1d27; border-top: 1px solid #2a2d3a;
-      justify-content: center; padding: 10px 16px;
-      gap: 6px; border-radius: 0;
-    }
+    .pres-controls { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1d27; border-top: 1px solid #2a2d3a; justify-content: center; padding: 10px 16px; gap: 6px; border-radius: 0; }
     .pres-controls button { padding: 10px 20px; border-radius: 6px; font-size: 14px; }
   }
-
-  /* Small phones */
   @media (max-width: 400px) {
     main { padding: 62px 10px 80px 10px; }
     .diagram-wrap { padding: 10px; }
@@ -144,8 +105,6 @@
     .ref-table { font-size: 12px; }
     .ref-table th, .ref-table td { padding: 8px 10px; }
   }
-
-  /* Swipe hint for scrollable areas on touch */
   @media (pointer: coarse) {
     .diagram-wrap { cursor: default; }
     .diagram-wrap:active { cursor: default; }
@@ -164,20 +123,21 @@
   <button class="active" onclick="showPhase(0)"><span class="phase-num">—</span> Overview</button>
   <button onclick="showPhase(1)"><span class="phase-num">1</span> Product Selection</button>
   <button onclick="showPhase(2)"><span class="phase-num">2</span> Consultation Form</button>
-  <button onclick="showPhase(3)"><span class="phase-num">3</span> Submission & Payment</button>
+  <button onclick="showPhase(3)"><span class="phase-num">3</span> Payment & Plan</button>
   <div class="nav-section">Verification & Review</div>
   <button onclick="showPhase(4)"><span class="phase-num">4</span> ID Verification</button>
-  <button onclick="showPhase(5)"><span class="phase-num">5</span> Clinical Review</button>
-  <div class="nav-section">Prescription</div>
-  <button onclick="showPhase(6)"><span class="phase-num">6</span> Rx Generation & Signing</button>
-  <button onclick="showPhase(7)"><span class="phase-num">6+</span> Rx Void & Replacement</button>
+  <button onclick="showPhase(5)"><span class="phase-num">5</span> Clinical Review Queue</button>
+  <button onclick="showPhase(6)"><span class="phase-num">6</span> Prescriber Review</button>
+  <div class="nav-section">Prescription & Approval</div>
+  <button onclick="showPhase(7)"><span class="phase-num">7</span> Rx & E-Signing (7A/7B)</button>
+  <button onclick="showPhase(8)"><span class="phase-num">8</span> Post-Approval Triggers</button>
   <div class="nav-section">Fulfilment</div>
-  <button onclick="showPhase(8)"><span class="phase-num">7</span> Order Confirmation</button>
-  <button onclick="showPhase(9)"><span class="phase-num">8</span> GP Letter</button>
-  <button onclick="showPhase(10)"><span class="phase-num">9</span> PMR & Print Slip</button>
-  <button onclick="showPhase(11)"><span class="phase-num">10</span> Repeat Detection</button>
-  <button onclick="showPhase(12)"><span class="phase-num">11</span> Dispatch</button>
-  <button onclick="showPhase(13)"><span class="phase-num">12</span> Post-Dispatch</button>
+  <button onclick="showPhase(9)"><span class="phase-num">9</span> PMR & Print Slip</button>
+  <button onclick="showPhase(10)"><span class="phase-num">10</span> Repeat Detection</button>
+  <button onclick="showPhase(11)"><span class="phase-num">11</span> Dispatch</button>
+  <button onclick="showPhase(12)"><span class="phase-num">12</span> Post-Dispatch</button>
+  <div class="nav-section">Subscriptions</div>
+  <button onclick="showPhase(13)"><span class="phase-num">13</span> Instalment Renewal</button>
   <div class="nav-section">Reference</div>
   <button onclick="showPhase(14)"><span class="phase-num">—</span> Error Paths</button>
   <button onclick="showPhase(15)"><span class="phase-num">—</span> API Integrations</button>
@@ -188,48 +148,114 @@
 
 <!-- ============ OVERVIEW ============ -->
 <div class="phase active" id="phase-0">
-<h2>Full Flow Overview</h2>
-<p class="phase-desc">High-level view of all phases. <strong>Green</strong> = happy path. <strong>Red</strong> = rejection/terminal. <strong>Orange</strong> = needs action. Click any phase in the sidebar to see full detail.</p>
+<div class="phase-header">
+  <h2>Full Flow Overview</h2>
+  <button class="pdf-btn" onclick="exportPDF(0)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">Bird's-eye view of the entire backend — every phase shown. <strong>Green</strong> = happy path. <strong>Red</strong> = exit/rejection. <strong>Purple</strong> = instalment path. <strong>Dashed</strong> = external API. Click any phase in the sidebar for granular detail.</p>
 <div class="diagram-wrap">
 <div class="zoom-hint">Scroll to zoom</div>
 <pre class="mermaid">
 flowchart TD
-  START["&#9654; START: Patient on product page"]:::startNode
-  START --> P1["<b>PHASE 1</b><br>Product Selection &<br>Account Check"]
-  P1 --> P2["<b>PHASE 2</b><br>Consultation Form"]
-  P2 -->|Auto-denied| AD["&#10006; END: Auto-Denied"]:::redNode
-  P2 -->|Form complete| P3["<b>PHASE 3</b><br>Submission &<br>Payment (full capture)"]
-  P3 -->|Payment fails| PF["&#8635; Retry Payment"]:::orangeNode
-  PF --> P3
-  P3 --> P10["<b>PHASE 10</b><br>Repeat Submission<br>Detection"]:::supportNode
-  P3 --> P4["<b>PHASE 4</b><br>ID Verification<br>(LexisNexis API)"]
-  P4 -->|ID rejected| IDR["&#10006; END: ID Rejected<br>+ Refund"]:::redNode
-  P4 -->|ID verified| P5["<b>PHASE 5</b><br>Prescriber Notification<br>& Clinical Review"]
-  P5 -->|Denied| CD["&#10006; END: Clinically Denied<br>+ Refund"]:::redNode
-  P5 -->|More info| MI["&#8635; Message Patient<br>& Re-review"]:::orangeNode
-  MI --> P5
-  P5 -->|Approved POM| P6["<b>PHASE 6</b><br>Rx Generation &<br>E-Signing<br>(SignatureRx API)"]
-  P5 -->|Approved P item| P7
-  P6 --> P6V["<b>PHASE 6+</b><br>Void & Replace Rx<br>(if error found)"]:::supportNode
-  P6 --> P7["<b>PHASE 7</b><br>Order Confirmation"]
-  P7 --> P8["<b>PHASE 8</b><br>GP Letter<br>Generation"]:::supportNode
-  P7 --> P9["<b>PHASE 9</b><br>PMR Sync &<br>Print Slip"]:::supportNode
-  P7 --> P11["<b>PHASE 11</b><br>Dispatch<br>(Royal Mail API)"]
-  P11 --> P12["<b>PHASE 12</b><br>Post-Dispatch &<br>Audit Trail"]
-  P12 --> DONE["&#9989; END: Order Complete"]:::greenNode
+  START["&#9654; Patient on product page"]:::startNode
+  START --> P1["<b>Phase 1</b><br>Product Selection &amp;<br>Consultation Entry"]
+  P1 --> P2["<b>Phase 2</b><br>Consultation Form<br>(multi-step wizard)"]
+  P2 --> DENY{"Auto-deny?"}
+  DENY -->|YES| AD["&#10006; Denied<br>Advised to see GP"]:::redNode
+  DENY -->|NO| P3
+
+  P3["<b>Phase 3</b><br>Payment &amp; Plan Selection"]
+  P3 --> TYPE{"One-off or<br>Instalment?"}
+  TYPE -->|ONE-OFF| PAY_A["Pay in full"]:::pathA
+  TYPE -->|INSTALMENT| PAY_B["Pay 1st month"]:::pathB
+  PAY_A --> P4
+  PAY_B --> P4
+
+  P4["<b>Phase 4</b><br>ID Verification"]:::apiNode
+  P4 --> ID{"Pass?"}
+  ID -->|YES| P5
+  ID -->|FAIL| IDX["&#10006; Rejected + Refund"]:::redNode
+
+  P5["<b>Phase 5</b><br>Clinical Review Queue<br>&amp; Notification"]
+  P5 --> P6["<b>Phase 6</b><br>Prescriber / Pharmacist<br>Reviews Case"]
+  P6 --> DEC{"Decision?"}
+  DEC -->|APPROVE| P7_SPLIT{"Order type?"}
+  DEC -->|MORE INFO| P6
+  DEC -->|DENY| DENR["&#10006; Denied + Refund"]:::redNode
+
+  P7_SPLIT -->|ONE-OFF| P7A["<b>Phase 7A</b><br>Single Rx<br>(one order)"]:::pathA
+  P7_SPLIT -->|INSTALMENT| P7B["<b>Phase 7B</b><br>Single Rx covering<br>full plan period"]:::pathB
+  P7A --> SIGN
+  P7B --> SIGN
+  SIGN["Prescriber signs in<br>SignatureRx (FINAL)"]:::apiNode
+  SIGN --> P8["<b>Phase 8</b><br>Post-Approval Triggers<br><i>Fires immediately on decision:</i><br>GP Letter | Patient Msg |<br><b>Pharmacy Team Notified</b>"]:::greenNode
+
+  P8 --> P9["<b>Phase 9</b><br>PMR Sync &amp;<br>Print Slip"]:::supportNode
+  P9 --> P10["<b>Phase 10</b><br>Repeat Submission<br>Detection"]:::supportNode
+
+  P10 --> P11["<b>Phase 11</b><br>Dispatch"]:::apiNode
+  P11 --> P12["<b>Phase 12</b><br>Delivery &amp; Tracking"]
+  P12 -->|DELIVERED| DONE["&#9989; Complete"]:::greenEnd
+  P12 -->|FAILED| DELFAIL["Team action"]:::orangeNode
+
+  DONE --> NEXT{"Order type?"}
+  NEXT -->|ONE-OFF| REORDER{"Within grace<br>period?"}
+  REORDER -->|YES| REORD["Re-confirm → reorder"]:::pathA
+  REORD --> P11
+  REORDER -->|NO| EXPIRED["Fresh consultation"]:::orangeNode
+
+  NEXT -->|INSTALMENT| P13["<b>Phase 13</b><br>Instalment Renewal"]:::pathB
+  P13 -->|"Next month"| P11
+  P13 -->|"Plan ends &amp;<br>within 12mo"| RECON["Re-confirm →<br>new plan"]:::pathB
+  RECON --> P13
+  P13 -->|"12mo limit /<br>grace expired"| FRESH["Fresh consultation"]:::orangeNode
+
+  %% API annotations — side labels connected with dotted lines
+  API_STRIPE["&#9889; <b>Stripe</b><br>Payment + Refunds"]:::apiLabel
+  API_LEXIS["&#9889; <b>LexisNexis</b><br>ID Verification"]:::apiLabel
+  API_SRX["&#9889; <b>SignatureRx</b><br>E-Prescribing"]:::apiLabel
+  API_TITAN["&#9889; <b>TitanPMR</b><br>Patient Data Sync"]:::apiLabel
+  API_RM["&#9889; <b>Royal Mail</b><br>Shipping + Tracking"]:::apiLabel
+
+  API_STRIPE -.-> P3
+  API_LEXIS -.-> P4
+  API_SRX -.-> SIGN
+  API_TITAN -.-> P9
+  API_RM -.-> P11
 
   classDef startNode fill:#1e3a5f,stroke:#60a5fa,color:#fff,stroke-width:2px
   classDef greenNode fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
+  classDef greenEnd fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
   classDef redNode fill:#7f1d1d,stroke:#f87171,color:#fff,stroke-width:2px
   classDef orangeNode fill:#78350f,stroke:#fbbf24,color:#fff,stroke-width:2px
+  classDef apiNode fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,stroke-dasharray: 5 5
   classDef supportNode fill:#f0f4ff,stroke:#93c5fd,color:#1e3a5f,stroke-width:1px,stroke-dasharray: 5 5
+  classDef pathA fill:#1e3a5f,stroke:#60a5fa,color:#fff,stroke-width:2px
+  classDef pathB fill:#3b1f5e,stroke:#a78bfa,color:#fff,stroke-width:2px
+  classDef apiLabel fill:#f5f3ff,stroke:#a78bfa,color:#5b21b6,stroke-width:1px,stroke-dasharray: 3 3,font-size:11px
 </pre>
+</div>
+<div class="annotation">
+<h3>Key Architecture Decisions</h3>
+<ul>
+<li><strong>Payment model:</strong> Full payment upfront. If rejected at any stage → automatic full refund.</li>
+<li><strong>One-off vs Instalment:</strong> Patient selects after consultation, before checkout. The flow splits at Phase 7: <span class="badge badge-blue">7A</span> = single Rx for one order. <span class="badge badge-purple">7B</span> = single Rx covering full instalment plan (max 3 months per plan, 12-month hard limit total).</li>
+<li><strong>Rx is final:</strong> Once the prescriber signs in SignatureRx, the prescription is locked. No void/replacement process.</li>
+<li><strong>Post-approval triggers (Phase 8):</strong> SignatureRx webhook fires THREE actions simultaneously: GP letter, patient notification, pharmacy queue entry. GP notified <em>before</em> dispatch.</li>
+<li><strong>Instalment renewal:</strong> Pharmacy auto-dispatches monthly (no prescriber re-review). At plan end, patient re-confirms. After 12 months total → fresh consultation required.</li>
+<li><strong>Renewal overlap flag:</strong> If a patient triggers a renewal while a previous plan is still active, this is prominently flagged to both the prescriber (Phase 6) and pharmacy team (dispatch) so they can assess whether overlapping supply is appropriate.</li>
+<li><strong>Answer expiry (grace period):</strong> After a plan or order ends, the patient has a grace period of <strong>plan duration + 1 month</strong> to reorder. If that window passes, all consultation answers are cleared and they must start a fresh consultation. (e.g. 3-month plan = 4-month grace, 6-month plan = 7-month grace, one-off = 1 month grace). Configurable per product.</li>
+<li><strong>POM vs P:</strong> POM requires prescriber + SignatureRx Rx. P requires pharmacist approval (logged, no Rx). Both support instalments.</li>
+</ul>
 </div>
 </div>
 
 <!-- ============ PHASE 1 ============ -->
 <div class="phase" id="phase-1">
-<h2>Phase 1: Product Selection & Consultation Entry</h2>
+<div class="phase-header">
+  <h2>Phase 1: Product Selection & Consultation Entry</h2>
+  <button class="pdf-btn" onclick="exportPDF(1)">&#128196; Export PDF</button>
+</div>
 <p class="phase-desc">Patient clicks the CTA on a product page and enters the consultation flow.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
@@ -257,7 +283,10 @@ flowchart TD
 
 <!-- ============ PHASE 2 ============ -->
 <div class="phase" id="phase-2">
-<h2>Phase 2: Consultation Form</h2>
+<div class="phase-header">
+  <h2>Phase 2: Consultation Form</h2>
+  <button class="pdf-btn" onclick="exportPDF(2)">&#128196; Export PDF</button>
+</div>
 <p class="phase-desc">Patient completes the consultation form. Auto-denial logic runs in real time.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
@@ -296,90 +325,103 @@ flowchart TD
 <h4>Consent</h4>
 <ul>
 <li>Before submission, patient must tick consent: T&Cs acceptance + agreement to remote consultation</li>
-<li>Consent is also required at <strong>reorder</strong> — patient confirms they can continue taking the treatment</li>
-<li>After subscription ends or the <span class="highlight">6-month hard limit</span>, a full new consultation form is required</li>
+<li>Consent is also required at <strong>instalment renewal</strong> — patient confirms nothing has changed</li>
+<li>After the <span class="highlight">12-month hard limit</span>, a full new consultation form is required</li>
 </ul>
 <h4>Abandonment recovery</h4>
 <ul>
 <li>If a <strong>logged-in</strong> patient starts but does not complete the consultation, the system logs the incomplete session</li>
-<li>After a configurable timeframe (e.g. 1 hour / 24 hours), system sends a reminder email: <em>"You started a consultation but didn't finish — pick up where you left off"</em></li>
-<li>Only works for logged-in users (we need their email to send the reminder)</li>
-<li>Non-logged-in abandonments cannot be recovered (no contact details available)</li>
+<li>After a configurable timeframe (e.g. 1 hour / 24 hours), system sends a reminder email</li>
+<li>Only works for logged-in users (we need their email)</li>
+<li>Non-logged-in abandonments cannot be recovered</li>
 </ul>
 </div>
 </div>
 
 <!-- ============ PHASE 3 ============ -->
 <div class="phase" id="phase-3">
-<h2>Phase 3: Consultation Submitted & Payment</h2>
-<p class="phase-desc">Consultation is saved, payment is taken in full, and the order enters the verification pipeline.</p>
+<div class="phase-header">
+  <h2>Phase 3: Payment & Plan Selection</h2>
+  <button class="pdf-btn" onclick="exportPDF(3)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">Consultation is saved, patient selects one-off or instalment plan, and payment is taken.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
   A["Consultation submitted"]
-  A --> B["System saves full<br>consultation record"]
-  B --> C["Generate consultation<br>reference number"]
-  C --> R["Run repeat submission<br>check → Phase 10"]:::supportNode
+  A --> B["System saves full<br>consultation record +<br>reference number"]
+  B --> R["Run repeat submission<br>check → Phase 10"]:::supportNode
   R --> L{"Logged in?"}
-  L -->|YES| D["Patient taken to<br>payment screen"]
+  L -->|YES| PLAN
   L -->|NO| M["Prompt: log in or<br>create account"]
   M --> N["Patient enters:<br>name, DOB, email,<br>phone, delivery address"]
-  N --> D
-  D --> E["Patient pays in full"]
-  E --> F{"Payment<br>successful?"}
+  N --> PLAN
+
+  PLAN["<b>Select order type:</b>"]
+  PLAN --> TYPE{"One-off or<br>Instalment?"}
+  TYPE -->|"ONE-OFF (A)"| QTY_A["Select quantity<br>(single order)"]:::pathA
+  TYPE -->|"INSTALMENT (B)"| QTY_B["Select instalment plan<br>(e.g. 2 months, 3 months)<br>Max: 3 months per plan<br>Hard limit: 12 months total"]:::pathB
+  QTY_A --> PAY["Patient pays"]
+  QTY_B --> PAY
+
+  PAY --> F{"Payment<br>successful?"}
   F -->|NO| G["&#8635; Show payment error<br>— patient can retry"]:::orangeNode
-  G --> D
-  F -->|YES| H["Payment captured +<br>stored against consultation"]:::greenNode
+  G --> PAY
+  F -->|YES| H["Payment captured"]:::greenNode
   H --> I["Confirmation shown:<br><i>'Payment received —<br>consultation being reviewed'</i>"]
-  I --> J{"Product type?"}
-  J -->|POM| K["→ PHASE 4: ID Check"]:::nextPhase
-  J -->|P item| K
+  I --> J["System records:<br>order type (one-off / instalment)<br>instalment count (if applicable)<br>instalment 1 of X"]
+  J --> K["→ PHASE 4: ID Check"]:::nextPhase
 
   classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
   classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
   classDef supportNode fill:#f0f4ff,stroke:#93c5fd,color:#1e3a5f,stroke-dasharray: 5 5
   classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
+  classDef pathA fill:#eef6ff,stroke:#60a5fa,color:#1e3a5f,stroke-width:2px
+  classDef pathB fill:#f3eeff,stroke:#a78bfa,color:#3b1f5e,stroke-width:2px
 </pre>
 </div>
 <div class="annotation">
 <h3>Annotation</h3>
-<h4>Login / account creation</h4>
+<h4>One-off vs Instalment selection</h4>
 <ul>
-<li>Patient completes the consultation <strong>without needing an account</strong></li>
-<li>Account is only required at checkout — reduces friction on the consultation form</li>
-<li>If already logged in, they skip straight to payment</li>
-<li>New account collects: full name, DOB, email, phone, delivery address</li>
-<li>Consultation record is linked to the account once created/logged in</li>
+<li>Patient chooses <span class="badge badge-blue">Path A: One-off</span> (single order) or <span class="badge badge-purple">Path B: Instalment</span> (recurring monthly dispatch)</li>
+<li>Instalment plans: <strong>max 3 months per plan</strong> — good practice to limit supply</li>
+<li><span class="warn">12-month hard limit</span> across ALL instalment plans. After 12 months of continuous treatment, a full fresh consultation is required</li>
+<li>Instalment availability is <strong>configurable per product</strong> — can be enabled/disabled by the pharmacy team</li>
+<li>Both POM and P items can support instalments</li>
 </ul>
 <h4>Payment model</h4>
 <ul>
-<li>Payment is taken <span class="highlight">upfront, in full</span> — not a pre-auth hold</li>
-<li>If the order is later rejected (ID fail or clinical denial), a <span class="warn">full refund</span> is issued</li>
-<li>Auto-denial (Phase 2) happens before payment — no refund needed in that case</li>
+<li><span class="highlight">One-off:</span> Full payment upfront for the single order</li>
+<li><span class="highlight">Instalment:</span> First month's payment taken now. Subsequent months charged automatically</li>
+<li>If the order is later rejected (ID fail or clinical denial), <span class="warn">full refund</span> is issued</li>
 </ul>
-<h4>Record saved</h4>
+<h4>Excessive quantity controls</h4>
 <ul>
-<li>Patient ID, all Q&As (mapped to questions), timestamp, product/category, unique reference number</li>
-<li>Both POM and P items go through ID check next — review role differs later</li>
+<li>Clinical/pharmacy team can set maximum quantity per product</li>
+<li>Prescriber can flag orders with excessive quantities during review</li>
+<li>System enforces: max 3 months supply per instalment plan</li>
 </ul>
 <h4>Patient cancellation (pre-dispatch)</h4>
 <ul>
-<li>Patient has a <strong>"Request Cancellation"</strong> button in their account — available for a <span class="highlight">limited time window</span> after payment (before dispatch)</li>
-<li>Button sends a message/email to the pharmacy team via the messaging centre</li>
+<li>Patient has a <strong>"Request Cancellation"</strong> button in their account — available before dispatch</li>
+<li>Button sends a message to the pharmacy team via the messaging centre</li>
 <li>Team manually processes the cancellation and issues a refund</li>
-<li>This is a manual process — not an instant auto-cancel</li>
 </ul>
 </div>
 </div>
 
 <!-- ============ PHASE 4 ============ -->
 <div class="phase" id="phase-4">
-<h2>Phase 4: ID Verification</h2>
+<div class="phase-header">
+  <h2>Phase 4: ID Verification</h2>
+  <button class="pdf-btn" onclick="exportPDF(4)">&#128196; Export PDF</button>
+</div>
 <p class="phase-desc">Patient identity is verified via LexisNexis. If it fails, manual upload and review is available.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
-  A["Call LexisNexis IDU API<br>(or equivalent)"]:::apiNode
+  A["Call LexisNexis IDU API"]:::apiNode
   A --> B{"ID check result?"}
   B -->|PASS| C["Record: Verified +<br>timestamp + reference"]:::greenNode
   C --> Z["→ PHASE 5"]:::nextPhase
@@ -392,12 +434,12 @@ flowchart TD
   H --> Z
   G -->|NO| I["Mark ID = Failed"]:::redNode
   I --> J["Order status:<br><b>Rejected — Awaiting Refund</b>"]
-  J --> K["Team issues refund<br>via payment processor"]
+  J --> K["Team issues refund"]
   K --> L{"Refund confirmed?<br>(webhook)"}
-  L -->|YES| M["Order status:<br><b>Rejected & Refunded</b>"]:::refunded
+  L -->|YES| M["<b>Rejected &amp; Refunded</b>"]:::refunded
   M --> N["Email patient:<br>order cannot proceed +<br>refund issued"]
-  N --> END["END — ID Rejected<br>& Refunded"]:::redEnd
-  L -->|NO| O["Order stays in<br><b>Awaiting Refund</b> queue"]:::orangeNode
+  N --> END["END — ID Rejected"]:::redEnd
+  L -->|NO| O["Stays in<br><b>Awaiting Refund</b> queue"]:::orangeNode
 
   classDef apiNode fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,stroke-dasharray: 5 5
   classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
@@ -414,232 +456,305 @@ flowchart TD
 <ul>
 <li>Rejected orders move to <span class="warn">"Rejected — Awaiting Refund"</span></li>
 <li>Team issues refund from within the payment processor (e.g. Stripe)</li>
-<li>Payment processor sends webhook confirming refund</li>
-<li>Order moves to <span class="warn">"Rejected & Refunded"</span> — patient email only sent after confirmation</li>
-<li>Creates two clear piles: <strong>awaiting refund</strong> vs <strong>fully refunded</strong></li>
+<li>Patient email only sent <span class="highlight">after refund is confirmed</span></li>
 </ul>
 </div>
 </div>
 
 <!-- ============ PHASE 5 ============ -->
 <div class="phase" id="phase-5">
-<h2>Phase 5: Prescriber Notification & Clinical Review</h2>
-<p class="phase-desc">Clinician is notified, reviews the case, and approves, requests more info, or denies.</p>
+<div class="phase-header">
+  <h2>Phase 5: Clinical Review Queue & Notification</h2>
+  <button class="pdf-btn" onclick="exportPDF(5)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">The consultation enters the review queue and the appropriate clinician is notified. This phase is about the queue and notification — the actual review happens in Phase 6.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
-  A["Consultation enters<br>review queue"]
-  A --> B["Send notification email<br>to prescriber/pharmacist"]:::apiNode
-  B --> C{"Who reviews?"}
-  C -->|POM| D["Prescriber opens case"]
-  C -->|P item| E["Pharmacist opens case"]
-  D --> F["Review: consultation answers,<br>ID status, patient history,<br>messages, repeat flags"]
+  A["Consultation enters<br>clinical review queue"]
+  A --> B["Dashboard shows:<br>reference, patient, category,<br>POM/P type, ID status,<br>order type (one-off / instalment),<br>instalment count, repeat flag,<br><b>renewal flag if repeat instalment</b>"]
+  B --> C{"Product type?"}
+  C -->|POM| D["Notification email sent<br>to <b>prescriber(s)</b>"]:::apiNode
+  C -->|P item| E["Notification email sent<br>to <b>pharmacist(s)</b>"]:::apiNode
+  D --> F["→ PHASE 6:<br>Prescriber reviews case"]:::nextPhase
   E --> F
-  F --> G{"Decision?"}
-  G -->|APPROVE| H["→ PHASE 6 (POM)<br>or PHASE 7 (P item)"]:::greenEnd
-  G -->|REQUEST MORE INFO| I["Message patient via<br>messaging centre"]:::orangeNode
-  I --> I2["Status: <b>Awaiting<br>Patient Response</b>"]
-  I2 --> I3["Patient replies"]
-  I3 --> I4["Clinician reviews reply"]
-  I4 --> G
-  G -->|DENY| J["Select denial reason +<br>add clinical notes<br>(mandatory)"]:::redNode
-  J --> K["Order status:<br><b>Rejected — Awaiting Refund</b>"]
-  K --> K2["Team issues refund"]
-  K2 --> K3{"Refund<br>confirmed?"}
-  K3 -->|YES| L["<b>Rejected & Refunded</b>"]
-  L --> M["Email patient: denied +<br>refund issued + advise GP"]
-  M --> END["END — Clinically<br>Denied & Refunded"]:::redEnd
-  K3 -->|NO| N["Stays in<br>Awaiting Refund queue"]:::orangeNode
 
   classDef apiNode fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-dasharray: 5 5
-  classDef greenEnd fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
-  classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
-  classDef redNode fill:#fef2f2,stroke:#f87171,color:#991b1b,stroke-width:2px
-  classDef redEnd fill:#7f1d1d,stroke:#f87171,color:#fff,stroke-width:2px
+  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
 </pre>
 </div>
 <div class="annotation">
 <h3>Annotation</h3>
 <h4>Notification email (secure, limited details)</h4>
 <ul>
-<li><strong>Contains:</strong> consultation reference, product category, type (POM/P), date/time, direct link to case</li>
+<li><strong>Contains:</strong> consultation reference, product category, type (POM/P), <span class="highlight">order type (one-off or instalment + count)</span>, date/time, direct link to case</li>
 <li><strong>Does NOT contain:</strong> patient name, DOB, answers, or any clinical information</li>
-<li>Prescriber must log in to see anything — link goes to the specific case</li>
-<li>Notification preferences configurable: immediate, batched (every 2h), or daily digest</li>
+<li>Clinician must log into the website backend to see anything — the link goes to the specific case</li>
 </ul>
-<h4>Denial</h4>
+<h4>Instalment &amp; renewal visibility</h4>
 <ul>
-<li>Mandatory: select reason from predefined list + free-text clinical notes</li>
-<li>Patient rejection email sent <span class="highlight">only after refund is confirmed</span></li>
+<li>The queue <strong>clearly labels</strong> whether an order is one-off or instalment</li>
+<li>If instalment: shows the plan duration (e.g. <span class="badge badge-purple">Instalment — 3 months</span>)</li>
+<li>If the patient is <strong>renewing on top of a previous instalment</strong> (i.e. they triggered a reorder before the last plan finished), this is <span class="warn">prominently flagged</span> as: <span class="badge badge-purple">RENEWAL — Instalment Plan 2 (prev. plan still active)</span></li>
+<li>This ensures the prescriber/pharmacist knows the patient already has an active supply and can assess whether an overlapping order is clinically appropriate</li>
 </ul>
-<h4>Consultation timeout / expiry</h4>
+<h4>Consultation timeout</h4>
 <ul>
-<li>System flags consultations pending review for <span class="highlight">more than 7 days</span> — visible in dashboard</li>
-<li>If clinician requested more info and patient hasn't replied — re-flagged after 7 days</li>
-<li>After <span class="warn">30 days</span> of inactivity, order is deemed "abandoned" — pharmacy team can manually reject and refund</li>
-<li>Consultations are flagged, <strong>not auto-expired</strong> — the team makes the final call</li>
+<li>System flags consultations pending review for <span class="highlight">more than 7 days</span></li>
+<li>After <span class="warn">30 days</span> of inactivity → flagged as "abandonable" (team makes final call, never auto-expired)</li>
 </ul>
 </div>
 </div>
 
 <!-- ============ PHASE 6 ============ -->
 <div class="phase" id="phase-6">
-<h2>Phase 6: Prescription Generation & E-Signing (POM only)</h2>
-<p class="phase-desc">Prescriber approves on Vivamen backend, prescription is created and signed inside SignatureRx, details are sent back via webhook.</p>
+<div class="phase-header">
+  <h2>Phase 6: Prescriber / Pharmacist Questionnaire Review</h2>
+  <button class="pdf-btn" onclick="exportPDF(6)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">The clinician logs into the website backend, opens the case, and reviews the full consultation questionnaire before making their clinical decision. This is the same person who will go on to sign the prescription in Phase 7 (if approved).</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
-  A["Prescriber clicks<br><b>'Approve Treatment'</b><br>on Vivamen backend"]
-  A --> B["System gathers Rx fields<br>(auto-populated from<br>consultation + product data)"]
-  B --> C["Prescriber reviews /<br>adjusts fields on<br>Vivamen backend"]
-  C --> D["Prescriber clicks<br><b>'Generate Prescription'</b>"]
-  D --> E["<b>API CALL →</b><br>SignatureRx:<br>CREATE PRESCRIPTION"]:::apiOut
-  E --> F["SignatureRx returns<br>Rx reference ID"]:::apiIn
-  F --> G["Prescriber completes<br>and signs Rx<br><b>inside SignatureRx</b>"]:::external
-  G --> H["<b>WEBHOOK ←</b><br>SignatureRx sends signed<br>Rx details + hash +<br>timestamp back to website"]:::apiIn
-  H --> I["Website stores signed<br>Rx record + locks Rx"]:::greenNode
-  I --> J["Log signing event<br>in audit trail"]
-  J --> K["Status: <b>Approved —<br>Prescription Signed</b>"]:::greenNode
-  K --> Z["→ PHASE 7"]:::nextPhase
+  A["Clinician clicks link<br>in notification email<br>(or opens queue manually)"]
+  A --> B["Logs into website backend"]
+  B --> C["Opens patient case"]
+  C --> D["<b>Reviews full consultation:</b><br>• All questions and answers<br>• ID verification status<br>• Patient history<br>• Any messages from patient<br>• Repeat submission flag<br>• Order type: one-off or instalment<br>• Instalment duration (if applicable)<br>• <b>Renewal flag + previous plan</b><br><b>history (if repeat instalment)</b>"]
+  D --> E{"Clinical decision?"}
+  E -->|APPROVE| F["Approved &#10003;"]:::greenNode
+  F --> G{"POM or P?"}
+  G -->|POM| H["→ PHASE 7:<br>Rx &amp; E-Signing"]:::nextPhase
+  G -->|P item| H2["Pharmacist approval<br>logged (no Rx needed)<br>→ PHASE 8: Triggers"]:::nextPhase
+  E -->|REQUEST MORE INFO| I["Clinician types message<br>for the patient"]:::orangeNode
+  I --> J["Message sent via<br>messaging centre +<br>email notification"]
+  J --> K["Status: <b>Awaiting<br>Patient Response</b>"]:::orangeNode
+  K --> L["Patient replies"]
+  L --> D
+  E -->|DENY| M["Select denial reason<br>(from predefined list)"]:::redNode
+  M --> N["Add clinical notes<br><b>(mandatory)</b>"]
+  N --> O["Status: <b>Rejected —<br>Awaiting Refund</b>"]
+  O --> P["Team issues refund"]
+  P --> Q{"Refund confirmed?"}
+  Q -->|YES| R["Email patient:<br>denied + refund + advise GP"]
+  R --> S["END — Clinically<br>Denied &amp; Refunded"]:::redEnd
+  Q -->|NO| T["Stays in Awaiting<br>Refund queue"]:::orangeNode
 
-  classDef apiOut fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,stroke-dasharray: 5 5
-  classDef apiIn fill:#f0e6ff,stroke:#a78bfa,color:#4c1d95,stroke-width:2px,stroke-dasharray: 5 5
-  classDef external fill:#fefce8,stroke:#ca8a04,color:#713f12,stroke-width:2px
-  classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
-  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
-</pre>
-</div>
-<div class="annotation">
-<h3>Annotation</h3>
-<h4>Where things happen</h4>
-<ul>
-<li><strong>Vivamen backend:</strong> treatment review, patient notes, clinical decision</li>
-<li><strong>SignatureRx:</strong> the prescription itself is created, written, and signed</li>
-</ul>
-<h4>API flow (two calls — one out, one back)</h4>
-<ul>
-<li><span class="highlight">Website → SignatureRx:</span> CREATE PRESCRIPTION — sends all Rx fields, receives reference ID</li>
-<li><span class="highlight">SignatureRx → Website:</span> WEBHOOK — sends signed Rx details, SHA-256 hash, timestamp, prescriber details</li>
-<li>Everything between these calls (MFA, signing) is handled <strong>entirely within SignatureRx</strong></li>
-</ul>
-<h4>Rx fields (auto-populated)</h4>
-<p>Patient name, DOB, medication name, strength, form, dose, frequency, quantity/duration, directions, date of issue, prescriber identity. Prescriber can adjust any field except name and DOB.</p>
-</div>
-</div>
-
-<!-- ============ PHASE 6+ VOID ============ -->
-<div class="phase" id="phase-7">
-<h2>Phase 6+: Prescription Void & Replacement</h2>
-<p class="phase-desc">If a signed prescription contains an error, the prescriber voids it in SignatureRx and creates a corrected version.</p>
-<div class="diagram-wrap">
-<pre class="mermaid">
-flowchart TD
-  A["Prescriber identifies<br>error in signed Rx"]:::orangeNode
-  A --> B["Prescriber voids Rx<br><b>inside SignatureRx</b>"]:::external
-  B --> C["<b>WEBHOOK ←</b><br>SignatureRx: Rx voided +<br>reason + timestamp"]:::apiIn
-  C --> D["Website marks original<br>Rx as <b>VOIDED</b><br>(kept for audit)"]:::redNode
-  D --> E["Order blocked<br>from dispatch"]
-  E --> F["Status: <b>Approved —<br>Awaiting New Prescription</b>"]:::orangeNode
-  F --> G["Prescriber creates<br>corrected Rx via<br>same create → sign flow"]
-  G --> H["<b>WEBHOOK ←</b><br>SignatureRx: new signed<br>Rx details"]:::apiIn
-  H --> I["Website stores new Rx<br>as new version —<br>becomes <b>ACTIVE</b>"]:::greenNode
-  I --> J["Status: <b>Approved —<br>Prescription Signed</b>"]:::greenNode
-  J --> Z["→ PHASE 7"]:::nextPhase
-
-  classDef apiIn fill:#f0e6ff,stroke:#a78bfa,color:#4c1d95,stroke-width:2px,stroke-dasharray: 5 5
-  classDef external fill:#fefce8,stroke:#ca8a04,color:#713f12,stroke-width:2px
   classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
   classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
   classDef redNode fill:#fef2f2,stroke:#f87171,color:#991b1b,stroke-width:2px
+  classDef redEnd fill:#7f1d1d,stroke:#f87171,color:#fff,stroke-width:2px
   classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
 </pre>
 </div>
 <div class="annotation">
 <h3>Annotation</h3>
-<h4>Version history (visible in backend)</h4>
+<h4>This is where the clinical decision happens</h4>
 <ul>
-<li>Version 1: <span class="warn">[Voided]</span> — signed [date], voided [date], reason: [reason]</li>
-<li>Version 2: <span class="highlight">[Active]</span> — signed [date]</li>
-<li>Only the most recent non-voided Rx is valid for dispatch</li>
-<li>All versions permanently stored and retrievable for audit/inspection</li>
-<li>Old versions are <strong>never deleted</strong> — locked and viewable</li>
+<li>Phase 5 was the <strong>notification and queue entry</strong>. Phase 6 is where the prescriber/pharmacist <strong>actually logs in, reads everything, and decides</strong>.</li>
+<li>This is the same person who will (if approved) go on to generate and sign the prescription in Phase 7.</li>
+<li>The split between Phase 5 and Phase 6 is <strong>deliberate</strong> — it makes it clear to the developer that these are two distinct system states: "waiting in queue" vs "actively being reviewed".</li>
+</ul>
+<h4>One-off vs instalment awareness</h4>
+<ul>
+<li>The case screen <strong>prominently displays</strong> whether this is a one-off order or an instalment plan</li>
+<li>If instalment: <span class="badge badge-purple">Instalment — 3 months</span> badge shown at the top of the case</li>
+<li>Prescriber can flag excessive quantities or instalment durations</li>
+</ul>
+<h4>Renewal instalment flag (repeat orders)</h4>
+<ul>
+<li>If the patient is renewing an instalment (i.e. reordering before or after a previous plan), the case screen shows a <span class="warn">prominent renewal banner</span>:</li>
+<li>Badge: <span class="badge badge-purple">RENEWAL — Plan 2 of ongoing treatment</span></li>
+<li>Shows <strong>previous plan history</strong>: plan number, dates, total months of treatment to date, whether the previous plan is still active</li>
+<li>If previous plan is <strong>still active</strong> (patient triggered reorder early), this is <span class="warn">highlighted in amber</span> so the prescriber can assess whether overlapping supply is clinically appropriate</li>
+<li>Prescriber sees total cumulative treatment duration to date — this is critical for the 12-month hard limit check</li>
+</ul>
+<h4>P items (Pharmacy Medicines)</h4>
+<ul>
+<li>For P items, the pharmacist makes the same review and decision</li>
+<li>If approved, the pharmacist's approval is <strong>logged</strong> (decision, pharmacist ID, timestamp) — but no formal Rx is generated</li>
+<li>The flow skips Phase 7 and goes directly to Phase 8 (post-approval triggers)</li>
+</ul>
+<h4>Denial</h4>
+<ul>
+<li>Mandatory: select reason from predefined list + free-text clinical notes</li>
+<li>Patient rejection email sent <span class="highlight">only after refund is confirmed</span></li>
 </ul>
 </div>
 </div>
 
 <!-- ============ PHASE 7 ============ -->
-<div class="phase" id="phase-8">
-<h2>Phase 7: Order Confirmation & Processing</h2>
-<p class="phase-desc">Payment is already captured. System generates the order and triggers parallel processes.</p>
+<div class="phase" id="phase-7">
+<div class="phase-header">
+  <h2>Phase 7: Rx Generation & E-Signing (7A / 7B)</h2>
+  <button class="pdf-btn" onclick="exportPDF(7)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">The prescriber generates and signs the prescription inside SignatureRx. The flow splits into <span class="badge badge-blue">Phase 7A (one-off)</span> and <span class="badge badge-purple">Phase 7B (instalment)</span>. Both paths merge after signing. For P items, this phase is skipped — pharmacist approval in Phase 6 goes directly to Phase 8.</p>
+
+<div class="sub-phase-label">PHASE 7A — ONE-OFF ORDER</div>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
-  A["Clinical approval complete<br>(+ Rx signed if POM)"]:::greenNode
-  A --> B["Payment already captured<br>at Phase 3 — no further<br>payment action needed"]
-  B --> C["Generate order record +<br>unique order number"]
-  C --> D["Link order to: consultation,<br>Rx (if POM), patient,<br>approval record, payment ref"]
-  D --> E0["Email patient:<br><b>'Consultation approved —<br>order being prepared'</b>"]:::emailNode
-  D --> E["→ Phase 8:<br>GP Letter"]:::supportNode
-  D --> F["→ Phase 9:<br>PMR + Print Slip"]:::supportNode
-  D --> G["→ Phase 11:<br>Dispatch Queue"]:::nextPhase
+  A["Prescriber clicks<br><b>'Approve Treatment'</b>"]
+  A --> B["System auto-populates Rx fields<br>from consultation + product data"]
+  B --> C["Prescriber reviews / adjusts"]
+  C --> D["Order type shown:<br><b>ONE-OFF — single order</b>"]:::pathA
+  D --> E["Prescriber clicks<br><b>'Generate Prescription'</b>"]
+  E --> F["&#128279; <b>OUTBOUND API</b><br>Website → SignatureRx:<br>CREATE PRESCRIPTION"]:::apiOut
+  F --> G["SignatureRx returns<br>Rx reference ID"]:::apiIn
+  G --> H["Prescriber signs Rx<br><b>inside SignatureRx</b><br>(MFA + e-signing)"]:::external
+  H --> I["&#128279; <b>INBOUND API (WEBHOOK)</b><br>SignatureRx → Website:<br>Signed Rx + hash + timestamp"]:::apiIn
+  I --> J["<b>Website backend receives</b><br>signed Rx via webhook"]:::backendNode
+  J --> J2["Rx LOCKED —<br>signature is final"]:::greenNode
+  J2 --> K["Website backend<br><b>automatically triggers</b><br>Phase 8 actions:<br>GP Letter | Patient Msg |<br><b>Pharmacy Team Notified</b>"]:::triggerNode
+  K --> L["→ PHASE 8"]:::nextPhase
 
+  classDef pathA fill:#eef6ff,stroke:#60a5fa,color:#1e3a5f,stroke-width:2px
+  classDef apiOut fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,stroke-dasharray: 5 5
+  classDef apiIn fill:#f0e6ff,stroke:#a78bfa,color:#4c1d95,stroke-width:2px,stroke-dasharray: 5 5
+  classDef external fill:#fefce8,stroke:#ca8a04,color:#713f12,stroke-width:2px
   classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
-  classDef emailNode fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px
-  classDef supportNode fill:#f0f4ff,stroke:#93c5fd,color:#1e3a5f,stroke-dasharray: 5 5
+  classDef backendNode fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:2px
+  classDef triggerNode fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
   classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
 </pre>
 </div>
+
+<div class="sub-phase-label variant-b">PHASE 7B — INSTALMENT ORDER</div>
+<div class="diagram-wrap">
+<pre class="mermaid">
+flowchart TD
+  A["Prescriber clicks<br><b>'Approve Treatment'</b>"]
+  A --> B["System auto-populates Rx fields +<br>instalment details"]
+  B --> C["Prescriber sees prominently:<br><b>INSTALMENT PLAN</b><br>Duration: X months<br>Instalment 1 of X<br>Max supply: 3 months"]:::pathB
+  C --> D["Prescriber reviews / adjusts"]
+  D --> E["Prescriber clicks<br><b>'Generate Prescription'</b>"]
+  E --> F["&#128279; <b>OUTBOUND API</b><br>Website → SignatureRx:<br>CREATE PRESCRIPTION<br>(covers full instalment period)"]:::apiOut
+  F --> G["SignatureRx returns<br>Rx reference ID"]:::apiIn
+  G --> H["Prescriber signs <b>single Rx</b><br>covering all instalments<br><b>inside SignatureRx</b><br>(MFA + e-signing)"]:::external
+  H --> I["&#128279; <b>INBOUND API (WEBHOOK)</b><br>SignatureRx → Website:<br>Signed Rx + hash + timestamp"]:::apiIn
+  I --> J["<b>Website backend receives</b><br>signed Rx via webhook"]:::backendNode
+  J --> J2["Rx LOCKED<br>Instalment plan recorded"]:::greenNode
+  J2 --> K["Website backend stores:<br>• Instalment 1 of X<br>• Next dispatch date<br>• Rx covers full period<br>• Renewal reminder date"]:::greenNode
+  K --> L["Website backend<br><b>automatically triggers</b><br>Phase 8 actions:<br>GP Letter | Patient Msg |<br><b>Pharmacy Team Notified</b>"]:::triggerNode
+  L --> M["→ PHASE 8"]:::nextPhase
+
+  classDef pathB fill:#f3eeff,stroke:#a78bfa,color:#3b1f5e,stroke-width:2px
+  classDef apiOut fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,stroke-dasharray: 5 5
+  classDef apiIn fill:#f0e6ff,stroke:#a78bfa,color:#4c1d95,stroke-width:2px,stroke-dasharray: 5 5
+  classDef external fill:#fefce8,stroke:#ca8a04,color:#713f12,stroke-width:2px
+  classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
+  classDef backendNode fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:2px
+  classDef triggerNode fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
+  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
+</pre>
+</div>
+
 <div class="annotation">
 <h3>Annotation</h3>
+<h4>Phase 7A vs 7B — key differences</h4>
+<div class="table-wrap">
+<table class="ref-table">
+<tr><th></th><th><span class="badge badge-blue">7A — One-Off</span></th><th><span class="badge badge-purple">7B — Instalment</span></th></tr>
+<tr><td>What patient selected</td><td>Single order</td><td>Instalment plan (2 or 3 months)</td></tr>
+<tr><td>What prescriber sees</td><td>"One-off order"</td><td>"Instalment plan — X months" (prominently displayed)</td></tr>
+<tr><td>Rx scope</td><td>Covers single order</td><td>Single Rx covering full instalment period</td></tr>
+<tr><td>After signing</td><td>One dispatch</td><td>Pharmacy auto-dispatches monthly (Instalment X of Y)</td></tr>
+<tr><td>Renewal</td><td>Patient reorders manually</td><td>Patient reminded at month X-1 to re-confirm (Phase 13)</td></tr>
+</table>
+</div>
+<h4>Where things happen — the API round-trip</h4>
 <ul>
-<li>Four things happen <strong>in parallel</strong> on approval: patient email, GP letter, PMR sync + print slip, dispatch queue</li>
-<li><strong>Approval email to patient:</strong> "Your consultation has been approved and your order is being prepared" — closes the comms gap between payment and dispatch</li>
-<li><strong>For P items:</strong> this phase is reached directly from Phase 5 (pharmacist approval) — no Rx signing step</li>
-<li>Pharmacist approval decision, ID, and timestamp are still logged as the audit trail</li>
+<li><strong>Step 1 — Vivamen backend (outbound API call):</strong> Prescriber clicks "Generate Prescription" → our website sends Rx data to SignatureRx via their <span class="badge badge-blue">API</span></li>
+<li><strong>Step 2 — SignatureRx (external platform):</strong> The prescription is created and the prescriber signs it inside SignatureRx. All MFA and e-signing is handled <strong>entirely within SignatureRx</strong> — not on our website</li>
+<li><strong>Step 3 — SignatureRx → Vivamen backend (inbound webhook / API callback):</strong> Once signed, SignatureRx sends a <span class="badge badge-purple">webhook</span> back to our website with the signed Rx data (hash, timestamp, prescriber details)</li>
+<li><strong>Step 4 — Vivamen backend (automatic triggers):</strong> Our website backend receives the webhook and <span class="highlight">immediately triggers Phase 8 actions</span>: GP letter generated, patient notified, <strong>pharmacy team notified that the Rx is ready</strong> — all fired automatically from the webhook handler, with no manual step in between</li>
+</ul>
+<p style="margin-top:8px;"><strong>Key point:</strong> The pharmacy team is informed <span class="highlight">the instant the prescriber signs</span>. There is no delay or manual handoff — the SignatureRx webhook hits our backend and the triggers fire automatically.</p>
+<h4>Rx is final</h4>
+<ul>
+<li>Once the prescriber signs, the prescription is <span class="highlight">locked and final</span></li>
+<li>There is <strong>no void/replacement process</strong> — the signature represents the prescriber's final clinical decision</li>
+<li>The signed Rx hash, timestamp, and prescriber details are stored permanently for audit</li>
+</ul>
+<h4>P items skip this phase</h4>
+<ul>
+<li>For P (Pharmacy) medicines, the pharmacist approved in Phase 6</li>
+<li>No formal Rx is generated — the approval decision, pharmacist ID, and timestamp serve as the record</li>
+<li>Flow goes directly from Phase 6 → Phase 8</li>
 </ul>
 </div>
 </div>
 
 <!-- ============ PHASE 8 ============ -->
-<div class="phase" id="phase-9">
-<h2>Phase 8: GP Letter Generation</h2>
-<p class="phase-desc">Auto-generated PDF letter sent to the patient's GP. Clinical team can input or correct the GP email.</p>
+<div class="phase" id="phase-8">
+<div class="phase-header">
+  <h2>Phase 8: Post-Approval Automated Triggers</h2>
+  <button class="pdf-btn" onclick="exportPDF(8)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">When the Rx is signed (POM) or pharmacist approves (P item), the SignatureRx webhook or approval event automatically triggers three parallel actions — all at the same time.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
-  A["Auto-generate GP letter<br>(PDF) from template"]
-  A --> B["Store against<br>patient record"]
-  B --> C{"GP email<br>available & valid?"}
-  C -->|YES| D["Auto-email GP letter"]
-  D --> E{"Email bounced<br>/ failed?"}
-  E -->|NO| F["&#9989; GP letter<br>sent successfully"]:::greenNode
-  E -->|YES| G["Flag: <b>GP Email Failed</b>"]:::orangeNode
-  G --> H["Clinical team inputs<br>corrected GP email<br>on this screen"]
-  H --> I["Resend GP letter"]
-  I --> F
-  C -->|NOT COLLECTED| J["Flag: <b>GP Email Missing</b>"]:::orangeNode
-  J --> K["Clinical team inputs<br>GP email on this screen"]
-  K --> L["Send GP letter"]
-  L --> F
+  A["SignatureRx signed webhook<br>(or pharmacist approval event)"]:::apiIn
+  A --> B["Website backend processes<br>signed Rx / approval"]
+  B --> C["<b>THREE AUTOMATED TRIGGERS</b><br>fire simultaneously:"]
 
+  C --> D["&#9993; <b>1. GP LETTER</b><br>Auto-generated PDF +<br>emailed to GP"]:::trigger
+  C --> E["&#9993; <b>2. PATIENT MESSAGE</b><br>'Your prescription has been<br>approved and is now<br>with the pharmacy'"]:::trigger
+  C --> F["&#9881; <b>3. PHARMACY NOTIFICATION</b><br>Order enters processing<br>queue in backend<br>(labelled: one-off<br>or instalment X of Y)"]:::trigger
+
+  D --> D2{"GP email<br>available?"}
+  D2 -->|YES| D3["Auto-email GP letter"]:::greenNode
+  D2 -->|NO| D4["Flag: GP Email Missing<br>Team can input later"]:::orangeNode
+  D3 --> D5{"Bounced?"}
+  D5 -->|NO| D6["&#9989; GP letter sent"]:::greenNode
+  D5 -->|YES| D7["Flag: GP Email Failed<br>Team corrects email"]:::orangeNode
+
+  E --> E2["Email + in-app message<br>to patient account"]:::greenNode
+
+  F --> F2["Order visible in<br>dispatch queue"]:::greenNode
+
+  classDef apiIn fill:#f0e6ff,stroke:#a78bfa,color:#4c1d95,stroke-width:2px,stroke-dasharray: 5 5
+  classDef trigger fill:#1e3a5f,stroke:#60a5fa,color:#fff,stroke-width:2px
   classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
   classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
 </pre>
 </div>
 <div class="annotation">
 <h3>Annotation</h3>
+<h4>Why GP letter fires on signing (not dispatch)</h4>
 <ul>
+<li>The GP is notified <span class="highlight">as soon as the prescription is signed</span> — before dispatch</li>
+<li>This gives the GP time to flag concerns or contact the patient/pharmacy <em>before</em> the medication is shipped</li>
+<li>This is a safety measure — the GP should be aware at the earliest possible moment</li>
+</ul>
+<h4>GP letter content</h4>
+<ul>
+<li>Patient name, DOB, medication prescribed/supplied, date, prescriber/pharmacist details</li>
 <li>Generated for <strong>ALL approved orders</strong> — both POM and P items</li>
-<li>Contains: patient name, DOB, medication, date, prescriber/pharmacist details</li>
-<li>GP email send status visible on order screen: <span class="badge badge-green">Sent</span> <span class="badge badge-red">Failed</span> <span class="badge badge-orange">Pending</span> <span class="badge badge-blue">Not Collected</span></li>
-<li>Clinical team always has a manual input field to enter/correct GP email</li>
+<li>GP email send status: <span class="badge badge-green">Sent</span> <span class="badge badge-red">Failed</span> <span class="badge badge-orange">Pending</span> <span class="badge badge-blue">Not Collected</span></li>
+<li>Clinical team always has a manual field to enter/correct GP email</li>
+</ul>
+<h4>Patient notification</h4>
+<ul>
+<li>Patient receives both an <strong>email</strong> and an <strong>in-app message</strong></li>
+<li>Confirms: what was prescribed, that it's with the pharmacy, and they'll get a dispatch email with tracking</li>
+</ul>
+<h4>Pharmacy notification</h4>
+<ul>
+<li>Order appears in the processing/dispatch queue</li>
+<li>Clearly labelled: <span class="badge badge-blue">One-Off</span> or <span class="badge badge-purple">Instalment 1 of 3</span></li>
+<li>All gate checks visible (ID, approval, Rx, payment)</li>
 </ul>
 </div>
 </div>
 
 <!-- ============ PHASE 9 ============ -->
-<div class="phase" id="phase-10">
-<h2>Phase 9: PMR Integration & Order Print Slip</h2>
+<div class="phase" id="phase-9">
+<div class="phase-header">
+  <h2>Phase 9: PMR Integration & Order Print Slip</h2>
+  <button class="pdf-btn" onclick="exportPDF(9)">&#128196; Export PDF</button>
+</div>
 <p class="phase-desc">Two parallel functions: sync to TitanPMR and a printable order slip for picking/packing.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
@@ -663,21 +778,24 @@ flowchart TD
 <h3>Annotation</h3>
 <h4>Order print slip fields (hardcoded template)</h4>
 <ul>
-<li>Patient full name, DOB, address</li>
-<li>Delivery address (if different)</li>
+<li>Patient full name, DOB, address, delivery address</li>
 <li>Item / medication name, pack size, quantity, dosage/directions</li>
 <li>Approved by: prescriber or pharmacist name</li>
 <li>Approval date + timestamp</li>
-<li>Order reference number, consultation reference number</li>
+<li>Order reference, consultation reference</li>
+<li><span class="highlight">Order type: One-Off or Instalment X of Y</span></li>
 </ul>
-<p>Available <strong>ONLY</strong> from the Approved Orders screen. Internal pharmacy use — accompanies the order during picking and packing.</p>
+<p>Available <strong>ONLY</strong> from the Approved Orders screen. Internal pharmacy use.</p>
 </div>
 </div>
 
 <!-- ============ PHASE 10 ============ -->
-<div class="phase" id="phase-11">
-<h2>Phase 10: Repeat Submission Detection</h2>
-<p class="phase-desc">Flags patients who submit multiple consultations in a short window — prevents system gaming.</p>
+<div class="phase" id="phase-10">
+<div class="phase-header">
+  <h2>Phase 10: Repeat Submission Detection</h2>
+  <button class="pdf-btn" onclick="exportPDF(10)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">Flags patients who submit multiple consultations in a short window.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
@@ -685,8 +803,8 @@ flowchart TD
   A --> B{"Same patient +<br>same category<br>within 7 days?"}
   B -->|NO| C["No flag —<br>proceed normally"]:::greenNode
   B -->|YES| D["Flag: <b>'Repeat submission —<br>X submissions in Y days'</b>"]:::orangeNode
-  D --> E["Flag visible to clinician<br>in Phase 5 review"]
-  E --> F["Clinician can view all<br>previous submissions in<br>patient history panel"]
+  D --> E["Flag visible to clinician<br>in Phase 6 review"]
+  E --> F["Clinician can view all<br>previous submissions"]
 
   classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
   classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
@@ -696,36 +814,39 @@ flowchart TD
 <h3>Annotation</h3>
 <ul>
 <li>Configurable time window (default 7 days)</li>
-<li>Optional: check if <strong>answers differ significantly</strong> between submissions — key abuse indicator</li>
-<li>Prominent warning banner when clinician opens the case</li>
+<li>Optional: compare answers between submissions and highlight differences</li>
+<li>Prominent warning banner when clinician opens the case in Phase 6</li>
 </ul>
 </div>
 </div>
 
 <!-- ============ PHASE 11 ============ -->
-<div class="phase" id="phase-12">
-<h2>Phase 11: Order Processing & Dispatch</h2>
-<p class="phase-desc">All gates must pass before dispatch. Royal Mail API generates shipping label and tracking.</p>
+<div class="phase" id="phase-11">
+<div class="phase-header">
+  <h2>Phase 11: Order Processing & Dispatch</h2>
+  <button class="pdf-btn" onclick="exportPDF(11)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">All gates must pass before dispatch. Royal Mail API generates shipping label and tracking. Instalment orders are clearly labelled.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
   A["Order appears in<br>dispatch queue"]
-  A --> B{"All gates passed?"}
-  B -->|ANY = NO| C["&#10006; Order blocked<br>+ flagged"]:::redNode
+  A --> A2["Order labelled:<br>ONE-OFF or<br>INSTALMENT X of Y"]
+  A2 --> B{"All gates passed?"}
+  B -->|ANY = NO| C["&#10006; Order blocked"]:::redNode
   B -->|ALL = YES| D["Staff picks and<br>packs order"]:::greenNode
   D --> E["Mark as <b>'Packed'</b>"]
-  E --> F["<b>API CALL →</b><br>Royal Mail:<br>CREATE SHIPMENT"]:::apiNode
-  F --> G["Royal Mail returns:<br>tracking number +<br>shipping label (PDF)"]
-  G --> H["Store tracking number +<br>print shipping label"]
+  E --> F["<b>API →</b> Royal Mail:<br>CREATE SHIPMENT"]:::apiNode
+  F --> G["Returns: tracking number +<br>shipping label (PDF)"]
+  G --> H["Store tracking + print label"]
   H --> I["Email patient:<br><b>'Order dispatched'</b> +<br>tracking link"]
-  I --> J["Package collected<br>by Royal Mail"]
-  J --> K["Patient receives package<br>(plain, discreet packaging)"]:::greenNode
-  K --> END["&#9989; END — Order Complete"]:::greenEnd
+  I --> J["Patient receives package<br>(plain, discreet packaging)"]:::greenNode
+  J --> END["→ PHASE 12"]:::nextPhase
 
   classDef apiNode fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-dasharray: 5 5
   classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
-  classDef greenEnd fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
   classDef redNode fill:#fef2f2,stroke:#f87171,color:#991b1b,stroke-width:2px
+  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
 </pre>
 </div>
 <div class="annotation">
@@ -737,21 +858,22 @@ flowchart TD
 <li>Prescription signed = YES (if POM)</li>
 <li>Payment confirmed = YES</li>
 </ul>
-<p>Enforced server-side — impossible to dispatch a non-ready order.</p>
-<h4>Stock management (future feature)</h4>
+<h4>Instalment dispatch tracking</h4>
 <ul>
-<li>Ability to input and maintain stock levels per product in the backend</li>
-<li>System checks stock before allowing dispatch — blocks order if out of stock</li>
-<li>Optional: low-stock alerts to pharmacy team</li>
-<li><em>Not required for initial build — can be added later</em></li>
+<li>Each instalment dispatch logged as <span class="badge badge-purple">Instalment X of Y</span></li>
+<li>Subsequent instalment dispatches are auto-queued — pharmacy team processes without prescriber re-review</li>
+<li>Pharmacy team can see a report of all upcoming instalment dispatches</li>
 </ul>
 </div>
 </div>
 
 <!-- ============ PHASE 12 ============ -->
-<div class="phase" id="phase-13">
-<h2>Phase 12: Post-Dispatch</h2>
-<p class="phase-desc">Delivery tracking, patient account access, and full audit trail.</p>
+<div class="phase" id="phase-12">
+<div class="phase-header">
+  <h2>Phase 12: Post-Dispatch & Delivery</h2>
+  <button class="pdf-btn" onclick="exportPDF(12)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">Delivery tracking, failed delivery handling, and the path to completion or instalment renewal.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
@@ -759,160 +881,215 @@ flowchart TD
   A --> B{"Delivery status?"}
   B -->|DELIVERED| C["Order status:<br><b>'Delivered'</b>"]:::greenNode
   C --> D["Patient can access:<br>order history, Rx records,<br>GP letters in account"]
-  D --> E{"Reorder<br>eligible?"}
-  E -->|YES| F["Patient clicks<br><b>'Reorder'</b>"]:::greenNode
-  F --> G["Confirm consent:<br>agree to continue treatment"]
-  G --> H["→ Payment →<br>Dispatch (no new<br>consultation needed)"]:::nextPhase
-  E -->|NO — subscription<br>ended or 6-month limit| I["Full new<br>consultation required"]:::orangeNode
-  I --> J["→ PHASE 1"]:::nextPhase
+  D --> E{"Order type?"}
+  E -->|ONE-OFF| F["&#9989; ORDER COMPLETE"]:::greenEnd
+  E -->|INSTALMENT| G{"Last instalment<br>of plan?"}
+  G -->|NO| H["Next instalment<br>auto-queued for<br>next month → Phase 11"]:::pathB
+  G -->|YES| I["→ Phase 13:<br>Instalment Renewal"]:::pathB
+
   B -->|FAILED / RETURNED| K["Order status:<br><b>'Delivery Failed'</b>"]:::redNode
-  K --> L["Appears in<br><b>Delivery Failed</b> screen"]
-  L --> M["Email notification<br>to pharmacy team"]
+  K --> L["Delivery Failed screen"]
+  L --> M["Pharmacy team notified"]
   M --> N{"Team action?"}
-  N -->|Re-dispatch| O["Update address /<br>re-send via Royal Mail"]:::greenNode
-  N -->|Contact patient| P["Message patient<br>via messaging centre"]:::orangeNode
+  N -->|Re-dispatch| O["Update address / re-send"]:::greenNode
+  N -->|Contact patient| P["Message via<br>messaging centre"]:::orangeNode
   N -->|Refund| Q["Issue refund"]:::redEnd
 
   classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
+  classDef greenEnd fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
   classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
   classDef redNode fill:#fef2f2,stroke:#f87171,color:#991b1b,stroke-width:2px
   classDef redEnd fill:#7f1d1d,stroke:#f87171,color:#fff,stroke-width:2px
-  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
+  classDef pathB fill:#f3eeff,stroke:#a78bfa,color:#3b1f5e,stroke-width:2px
 </pre>
 </div>
 <div class="annotation">
 <h3>Annotation</h3>
 <h4>Delivery failure</h4>
 <ul>
-<li>Failed deliveries (returned to sender, refused, wrong address) go into a dedicated <strong>"Delivery Failed"</strong> screen</li>
-<li>Pharmacy team is notified via email when a delivery fails</li>
-<li>Team can: re-dispatch to corrected address, contact patient, or issue refund</li>
+<li>Failed deliveries go into a dedicated <strong>"Delivery Failed"</strong> screen</li>
+<li>Team can: re-dispatch, contact patient, or issue refund</li>
 </ul>
-<h4>Reorder flow</h4>
+<h4>Audit trail (accessible at any time)</h4>
 <ul>
-<li>Patient can reorder the same treatment after a <span class="highlight">configurable timeframe</span> based on the product (e.g. 1-month supply → reorder available after ~2 weeks)</li>
-<li>Reorder requires <strong>consent confirmation</strong> — patient agrees they can continue taking the treatment</li>
-<li>Reorder skips the consultation form — goes straight to payment → dispatch</li>
-<li>After the subscription ends OR the <span class="warn">6-month hard limit</span>, a full new consultation form is required</li>
+<li>Consultation form and answers, ID check, clinical decision, Rx record, payment, dispatch/tracking, instalment history</li>
 </ul>
-<h4>Audit trail (accessible to clinical team at any time)</h4>
+</div>
+</div>
+
+<!-- ============ PHASE 13 ============ -->
+<div class="phase" id="phase-13">
+<div class="phase-header">
+  <h2>Phase 13: Instalment Renewal Flow</h2>
+  <button class="pdf-btn" onclick="exportPDF(13)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">How instalment plans renew, the patient re-confirmation process, and the 12-month hard limit.</p>
+<div class="diagram-wrap">
+<pre class="mermaid">
+flowchart TD
+  A["Patient approaching<br>final month of<br>instalment plan"]:::pathB
+  A --> B["System sends reminder<br>at <b>month X-1</b><br>(e.g. month 2 of 3):<br>'Log in to manage<br>your next order'"]
+  B --> C["Patient logs into<br>their account"]
+  C --> D["System displays their<br><b>latest consultation<br>form answers</b><br>for review"]
+  D --> E["Patient must tick<br>confirmation boxes:"]
+  E --> E1["&#9745; I confirm my answers<br>are still accurate"]
+  E1 --> E2["&#9745; Nothing has changed<br>in my medical history"]
+  E2 --> E3["&#9745; I consent to inform<br>Vivamen proactively<br>if anything changes"]
+  E3 --> F{"Does patient<br>want to renew?"}
+  F -->|YES| G{"Within 12-month<br>hard limit?"}
+  G -->|YES| H["New instalment plan<br>starts (e.g. next 3 months)"]:::pathB
+  H --> I["Payment taken for<br>first month of<br>new plan"]
+  I --> J["Pharmacy team processes<br>(no prescriber review —<br>clearly labelled as<br>renewal instalment)"]:::greenNode
+  J --> K["→ Phase 11: Dispatch"]:::nextPhase
+  G -->|"NO — 12 months reached"| L["<b>12-MONTH HARD LIMIT</b><br>Answers cleared —<br>full new consultation<br>required"]:::orangeNode
+  L --> M["Patient directed to<br>→ Phase 1"]:::nextPhase
+  F -->|NO| N["Plan ends —<br>patient can reorder<br>within grace period"]:::greenNode
+  N --> GRACE{"Reorder within<br>grace period?<br>(plan duration + 1 month)"}
+  GRACE -->|YES| REORD["Patient re-confirms<br>answers → new order<br>or new plan"]:::pathB
+  REORD --> K
+  GRACE -->|"NO — grace period<br>expired"| EXPIRED["<b>ANSWERS EXPIRED</b><br>All consultation data<br>cleared — patient must<br>start fresh"]:::orangeNode
+  EXPIRED --> M
+
+  classDef pathB fill:#f3eeff,stroke:#a78bfa,color:#3b1f5e,stroke-width:2px
+  classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
+  classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
+  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
+</pre>
+</div>
+<div class="annotation">
+<h3>Annotation</h3>
+<h4>Renewal process</h4>
 <ul>
-<li>Consultation form and answers</li>
-<li>ID check result</li>
-<li>Clinical decision (approve/deny), reason, notes, clinician ID</li>
-<li>Prescription record and signature details (hash, timestamp, prescriber)</li>
-<li>Payment record + refund status (if applicable)</li>
-<li>Dispatch and tracking info</li>
+<li>At month X-1 of the plan (e.g. month 2 of 3), patient receives email + in-app notification</li>
+<li>Patient logs in and is shown their <strong>original consultation answers</strong></li>
+<li>They must tick <strong>three confirmation boxes</strong> — this is their re-consent</li>
+<li>If they confirm, a new instalment plan starts and payment is taken</li>
 </ul>
+<h4>Pharmacy team processing (no prescriber review)</h4>
+<ul>
+<li>Renewal instalments go <strong>directly to the pharmacy team</strong> — not back to the prescriber</li>
+<li>Clearly labelled in the dispatch queue: <span class="badge badge-purple">Renewal — Instalment Plan 2 (3 months)</span></li>
+<li>Pharmacy team can see at a glance:
+  <ul>
+  <li><strong>Plan number:</strong> which plan this is (e.g. Plan 2, Plan 3)</li>
+  <li><strong>Total treatment duration:</strong> cumulative months since original consultation</li>
+  <li><strong>Previous plan still active?</strong> If yes, flagged in <span class="warn">amber</span> — the patient triggered a renewal before their last plan finished, so the team should check the overlap is appropriate before dispatching</li>
+  <li><strong>Instalment X of Y:</strong> where in the current plan this dispatch falls</li>
+  </ul>
+</li>
+<li>Pharmacy team processes and dispatches as normal — but the overlap flag ensures they consciously acknowledge it</li>
+</ul>
+<h4>12-month hard limit</h4>
+<ul>
+<li><span class="warn">12 months is the absolute maximum</span> for continuous treatment without a fresh consultation</li>
+<li>This is a hard system block — the patient cannot renew past this point</li>
+<li>After 12 months, all consultation answers are <strong>cleared</strong> — full new consultation required (Phase 1), going through the full review cycle again</li>
+</ul>
+<h4>Answer expiry (grace period)</h4>
+<ul>
+<li>After any plan ends (or a one-off order completes), the patient has a <strong>grace period to reorder</strong> without redoing the consultation</li>
+<li>Grace period = <span class="warn">plan/order duration + 1 month</span> (e.g. 3-month plan = 4-month grace, 6-month plan = 7-month grace, one-off = 1-month grace)</li>
+<li>If the grace period passes, the system <strong>clears all stored consultation answers</strong></li>
+<li>The patient must then complete a fresh consultation from scratch (Phase 1)</li>
+<li>This applies to both one-off and instalment patients — the clock starts from the date of the last dispatched order</li>
+<li>Grace period should be <strong>configurable per product</strong> so it can be adjusted in future</li>
+</ul>
+<h4>Example timeline: 3-month plans</h4>
+<div class="table-wrap">
+<table class="ref-table">
+<tr><th>Month</th><th>What happens</th></tr>
+<tr><td>1</td><td>Initial order — consultation, review, Rx, dispatch (Instalment 1/3)</td></tr>
+<tr><td>2</td><td>Auto-dispatch by pharmacy (Instalment 2/3). Patient reminded to re-confirm.</td></tr>
+<tr><td>3</td><td>Auto-dispatch (Instalment 3/3). Plan complete.</td></tr>
+<tr><td>3 (end)</td><td>Patient renews: reviews answers, ticks boxes, pays → new plan starts</td></tr>
+<tr><td>4–6</td><td>Second plan runs (Instalment 1/3, 2/3, 3/3)</td></tr>
+<tr><td>7–9</td><td>Third plan (if renewed)</td></tr>
+<tr><td>10–12</td><td>Fourth plan (if renewed)</td></tr>
+<tr><td>12+</td><td><span class="warn">HARD LIMIT — answers cleared, full new consultation required</span></td></tr>
+<tr><td colspan="2" style="padding-top:12px;"><strong>Grace period rule (applies to all orders):</strong></td></tr>
+<tr><td>Within grace period<br>(plan duration + 1mo)</td><td>Patient can reorder (re-confirm answers, no new consultation)</td></tr>
+<tr><td>Grace period expired</td><td><span class="warn">Answers expired &amp; cleared — fresh consultation required</span></td></tr>
+</table>
+</div>
 </div>
 </div>
 
 <!-- ============ ERROR PATHS ============ -->
 <div class="phase" id="phase-14">
-<h2>Error / Exception Paths Summary</h2>
+<div class="phase-header">
+  <h2>Error / Exception Paths Summary</h2>
+  <button class="pdf-btn" onclick="exportPDF(14)">&#128196; Export PDF</button>
+</div>
 <p class="phase-desc">All rejection and error scenarios with refund status.</p>
 <div class="table-wrap">
 <table class="ref-table">
 <tr><th>Scenario</th><th>What happens</th><th>Refund?</th><th>Terminal state</th></tr>
 <tr><td>Auto-denial from form logic</td><td>Patient told treatment not suitable, advised to see GP</td><td><span class="badge badge-green">No — before payment</span></td><td>Auto-Denied</td></tr>
 <tr><td>Payment fails at checkout</td><td>Patient shown error, can retry</td><td><span class="badge badge-blue">N/A — never captured</span></td><td>Awaiting Payment</td></tr>
-<tr><td>ID check fails</td><td>Upload requested → manual review → if still fails, rejected</td><td><span class="badge badge-red">Yes — via payment processor</span></td><td>Rejected → Refunded</td></tr>
+<tr><td>ID check fails</td><td>Upload requested → manual review → if still fails, rejected</td><td><span class="badge badge-red">Yes — via Stripe</span></td><td>Rejected → Refunded</td></tr>
 <tr><td>Clinician requests more info</td><td>Patient messaged, consultation paused</td><td><span class="badge badge-green">No — still active</span></td><td>Awaiting Response</td></tr>
-<tr><td>Clinician denies treatment</td><td>Reason logged, patient notified after refund</td><td><span class="badge badge-red">Yes — via payment processor</span></td><td>Rejected → Refunded</td></tr>
-<tr><td>Repeat submission detected</td><td>Flag shown to clinician during review</td><td><span class="badge badge-green">No — informational</span></td><td>Flagged for Review</td></tr>
-<tr><td>Prescription voided</td><td>Rx marked voided, order blocked until replacement</td><td><span class="badge badge-green">No — still active</span></td><td>Awaiting Replacement</td></tr>
-<tr><td>Consultation abandoned (logged in)</td><td>Reminder email sent after configurable delay. Incomplete session logged.</td><td><span class="badge badge-blue">N/A — before payment</span></td><td>Abandoned (Draft)</td></tr>
-<tr><td>Patient requests cancellation</td><td>Message sent to pharmacy team. Team manually cancels and refunds.</td><td><span class="badge badge-red">Yes — manual refund</span></td><td>Cancelled → Refunded</td></tr>
-<tr><td>Consultation timeout (30 days)</td><td>Flagged at 7 days, re-flagged if no reply. Team can reject/refund after 30 days.</td><td><span class="badge badge-red">Yes — manual refund</span></td><td>Abandoned → Refunded</td></tr>
-<tr><td>Delivery failed / returned</td><td>Order enters Delivery Failed screen. Team notified via email. Can re-dispatch, contact patient, or refund.</td><td><span class="badge badge-orange">Depends on action</span></td><td>Delivery Failed</td></tr>
-<tr><td>API unavailable (LexisNexis)</td><td>Order tagged "ID Check — Pending (API Unavailable)". System retries.</td><td><span class="badge badge-green">No — still active</span></td><td>Pending (API Down)</td></tr>
-<tr><td>API unavailable (SignatureRx)</td><td>Order tagged "Rx — Pending (API Unavailable)". System retries.</td><td><span class="badge badge-green">No — still active</span></td><td>Pending (API Down)</td></tr>
-<tr><td>API unavailable (Royal Mail)</td><td>Order tagged "Dispatch — Pending (API Unavailable)". System retries.</td><td><span class="badge badge-green">No — still active</span></td><td>Pending (API Down)</td></tr>
+<tr><td>Clinician denies treatment</td><td>Reason logged, patient notified after refund confirmed</td><td><span class="badge badge-red">Yes — via Stripe</span></td><td>Rejected → Refunded</td></tr>
+<tr><td>Repeat submission detected</td><td>Flag shown to clinician during Phase 6 review</td><td><span class="badge badge-green">No — informational</span></td><td>Flagged for Review</td></tr>
+<tr><td>Consultation abandoned</td><td>Reminder email sent. Flagged at 7 days, abandonable at 30 days.</td><td><span class="badge badge-blue">N/A — before payment</span></td><td>Abandoned (Draft)</td></tr>
+<tr><td>Patient requests cancellation</td><td>Message to pharmacy team. Manual cancel + refund.</td><td><span class="badge badge-red">Yes — manual</span></td><td>Cancelled → Refunded</td></tr>
+<tr><td>Consultation timeout (30 days)</td><td>Team can reject/refund after 30 days.</td><td><span class="badge badge-red">Yes — manual</span></td><td>Abandoned → Refunded</td></tr>
+<tr><td>Delivery failed / returned</td><td>Delivery Failed screen. Team re-dispatches, contacts, or refunds.</td><td><span class="badge badge-orange">Depends on action</span></td><td>Delivery Failed</td></tr>
+<tr><td>API unavailable (any)</td><td>Order tagged "Pending (API Unavailable)". Auto-retry: 5min → 30min → 2hr → flag manual.</td><td><span class="badge badge-green">No — still active</span></td><td>Pending (API Down)</td></tr>
+<tr><td>Instalment payment fails (month 2+)</td><td>Pharmacy notified. Patient contacted. Dispatch paused.</td><td><span class="badge badge-orange">May cancel remaining</span></td><td>Instalment Paused</td></tr>
+<tr><td>12-month hard limit reached</td><td>Patient cannot renew. Must complete full new consultation.</td><td><span class="badge badge-green">No — not an error</span></td><td>Consultation Required</td></tr>
 </table>
 </div>
 </div>
 
 <!-- ============ API TABLE ============ -->
 <div class="phase" id="phase-15">
-<h2>Key API Integrations</h2>
+<div class="phase-header">
+  <h2>Key API Integrations</h2>
+  <button class="pdf-btn" onclick="exportPDF(15)">&#128196; Export PDF</button>
+</div>
 <p class="phase-desc">All external system integrations with direction and timing.</p>
 <div class="table-wrap">
 <table class="ref-table">
 <tr><th>System</th><th>API</th><th>Direction</th><th>When</th></tr>
-<tr><td>LexisNexis IDU</td><td>Identity verification</td><td><span class="badge badge-blue">Website → LexisNexis</span></td><td>Phase 4 — after consultation submitted</td></tr>
-<tr><td>SignatureRx</td><td>Create Prescription</td><td><span class="badge badge-blue">Website → SignatureRx</span></td><td>Phase 6 — prescriber approves POM</td></tr>
-<tr><td>SignatureRx</td><td>Signed Rx webhook</td><td><span class="badge badge-orange">SignatureRx → Website</span></td><td>Phase 6 — after Rx is signed</td></tr>
-<tr><td>SignatureRx</td><td>Voided Rx webhook</td><td><span class="badge badge-orange">SignatureRx → Website</span></td><td>Phase 6 — when Rx is voided</td></tr>
+<tr><td>LexisNexis IDU</td><td>Identity verification</td><td><span class="badge badge-blue">Website → LexisNexis</span></td><td>Phase 4 — after payment</td></tr>
+<tr><td>SignatureRx</td><td>Create Prescription</td><td><span class="badge badge-blue">Website → SignatureRx</span></td><td>Phase 7 — prescriber approves POM</td></tr>
+<tr><td>SignatureRx</td><td>Signed Rx webhook</td><td><span class="badge badge-orange">SignatureRx → Website</span></td><td>Phase 7 → triggers Phase 8 (GP letter + patient msg + pharmacy queue)</td></tr>
 <tr><td>Royal Mail</td><td>Create Shipment</td><td><span class="badge badge-blue">Website → Royal Mail</span></td><td>Phase 11 — after order packed</td></tr>
 <tr><td>Royal Mail</td><td>Tracking webhook</td><td><span class="badge badge-orange">Royal Mail → Website</span></td><td>Phase 12 — delivery updates</td></tr>
 <tr><td>TitanPMR</td><td>Patient data push</td><td><span class="badge badge-blue">Website → TitanPMR</span></td><td>Phase 9 — after order confirmed</td></tr>
-<tr><td>Payment Gateway</td><td>Full capture</td><td><span class="badge badge-blue">Website → Stripe</span></td><td>Phase 3 — after consultation submitted</td></tr>
-<tr><td>Payment Gateway</td><td>Refund webhook</td><td><span class="badge badge-orange">Stripe → Website</span></td><td>After team issues refund from Stripe</td></tr>
+<tr><td>Stripe</td><td>Full capture / first instalment</td><td><span class="badge badge-blue">Website → Stripe</span></td><td>Phase 3 — after plan selection</td></tr>
+<tr><td>Stripe</td><td>Recurring instalment charge</td><td><span class="badge badge-purple">Stripe → auto-charge</span></td><td>Phase 13 — monthly for instalment plans</td></tr>
+<tr><td>Stripe</td><td>Refund confirmation webhook</td><td><span class="badge badge-orange">Stripe → Website</span></td><td>After team issues refund</td></tr>
 </table>
 </div>
 </div>
 
 <!-- ============ OPTIONAL EXTRAS ============ -->
 <div class="phase" id="phase-16">
-<h2>Optional Extras</h2>
-<p class="phase-desc">Features we ideally want but can be removed or deferred if not practical to build in the initial release. These are <strong>not blockers</strong> — the core flow works without them.</p>
+<div class="phase-header">
+  <h2>Optional Extras</h2>
+  <button class="pdf-btn" onclick="exportPDF(16)">&#128196; Export PDF</button>
+</div>
+<p class="phase-desc">Features we ideally want but can be deferred. These are <strong>not blockers</strong> — the core flow works without them.</p>
 
 <div class="table-wrap">
 <table class="ref-table">
-<tr><th>Priority</th><th>Feature</th><th>What it does</th><th>Where in flow</th><th>Fallback if not built</th></tr>
-<tr>
-  <td><span class="badge badge-orange">High</span></td>
-  <td><strong>Stock / inventory management</strong></td>
-  <td>Input and maintain stock levels per product. System checks stock before dispatch and blocks if out of stock. Optional low-stock email alerts to pharmacy team.</td>
-  <td>Phase 11 — Dispatch</td>
-  <td>Team manually tracks stock offline. No system-level block on out-of-stock orders.</td>
-</tr>
-<tr>
-  <td><span class="badge badge-orange">High</span></td>
-  <td><strong>TitanPMR API integration</strong></td>
-  <td>Automatically push patient + medication data to TitanPMR after order confirmation. Requires Titan enterprise plan.</td>
-  <td>Phase 9 — PMR</td>
-  <td>Already in spec: staff manually exports/enters data into TitanPMR. Works without the API.</td>
-</tr>
-<tr>
-  <td><span class="badge badge-blue">Medium</span></td>
-  <td><strong>Royal Mail tracking webhook</strong></td>
-  <td>Automatic delivery status updates pushed from Royal Mail to the website. Updates order status to "Delivered" or "Failed" automatically.</td>
-  <td>Phase 12 — Post-Dispatch</td>
-  <td>Staff manually updates order status based on Royal Mail tracking portal.</td>
-</tr>
-<tr>
-  <td><span class="badge badge-blue">Medium</span></td>
-  <td><strong>Prescriber notification batching</strong></td>
-  <td>Configurable notification digest per prescriber: immediate email per order, batched every 2 hours, or daily digest at a set time.</td>
-  <td>Phase 5 — Clinical Review</td>
-  <td>Send immediate email for every new consultation. Simpler, still functional.</td>
-</tr>
-<tr>
-  <td><span class="badge badge-blue">Medium</span></td>
-  <td><strong>Repeat submission answer-diff detection</strong></td>
-  <td>When a patient submits multiple consultations, system compares answers between submissions and highlights significant differences. Key indicator of system gaming.</td>
-  <td>Phase 10 — Repeat Detection</td>
-  <td>Clinician still sees the repeat submission flag and can manually view all previous submissions side by side.</td>
-</tr>
-<tr>
-  <td><span class="badge badge-green">Low</span></td>
-  <td><strong>Low-stock email alerts</strong></td>
-  <td>Automated email to pharmacy team when stock drops below a configurable threshold.</td>
-  <td>Phase 11 — Dispatch</td>
-  <td>Only relevant if stock management (above) is built. Without it, team monitors stock manually.</td>
-</tr>
+<tr><th>Priority</th><th>Feature</th><th>What it does</th><th>Where</th><th>Fallback</th></tr>
+<tr><td><span class="badge badge-orange">High</span></td><td><strong>Stock management</strong></td><td>Track stock levels, block dispatch if out of stock</td><td>Phase 11</td><td>Manual tracking</td></tr>
+<tr><td><span class="badge badge-orange">High</span></td><td><strong>TitanPMR API</strong></td><td>Auto-push patient data to PMR</td><td>Phase 9</td><td>Manual export</td></tr>
+<tr><td><span class="badge badge-blue">Medium</span></td><td><strong>Royal Mail tracking webhook</strong></td><td>Auto-update delivery status</td><td>Phase 12</td><td>Manual status update</td></tr>
+<tr><td><span class="badge badge-blue">Medium</span></td><td><strong>Notification batching</strong></td><td>Digest emails for prescribers</td><td>Phase 5</td><td>Immediate per case</td></tr>
+<tr><td><span class="badge badge-blue">Medium</span></td><td><strong>Answer-diff detection</strong></td><td>Compare repeat submission answers</td><td>Phase 10</td><td>Manual comparison</td></tr>
+<tr><td><span class="badge badge-green">Low</span></td><td><strong>Low-stock alerts</strong></td><td>Email when stock is low</td><td>Phase 11</td><td>Depends on stock mgmt</td></tr>
 </table>
 </div>
 
 <div class="annotation">
-<h3>Notes for dev team</h3>
+<h3>Priority key</h3>
 <ul>
 <li><span class="badge badge-orange">High</span> = strong business value, build if timeline allows</li>
-<li><span class="badge badge-blue">Medium</span> = nice to have, can defer to v2</li>
-<li><span class="badge badge-green">Low</span> = dependent on another optional feature being built first</li>
-<li>All core flows (consultation → payment → ID → review → Rx → dispatch → delivery) work <strong>without any of these</strong></li>
-<li>Each feature has a manual fallback already designed into the spec</li>
+<li><span class="badge badge-blue">Medium</span> = nice to have, defer to v2</li>
+<li><span class="badge badge-green">Low</span> = dependent on another optional feature</li>
 </ul>
 </div>
 </div>
@@ -921,13 +1098,12 @@ flowchart TD
 
 <!-- Presentation controls -->
 <div class="pres-controls">
-  <button onclick="prevPhase()">← Prev</button>
+  <button onclick="prevPhase()">&#8592; Prev</button>
   <button class="page-indicator" id="pageIndicator">1 / 17</button>
-  <button onclick="nextPhase()">Next →</button>
+  <button onclick="nextPhase()">Next &#8594;</button>
 </div>
 
 <script>
-  // Disable auto-render — Mermaid cannot render inside display:none containers
   mermaid.initialize({
     startOnLoad: false,
     theme: 'default',
@@ -940,7 +1116,6 @@ flowchart TD
   let currentPhase = 0;
   const totalPhases = 17;
 
-  // Mobile navigation toggle
   function toggleNav() {
     document.getElementById('sideNav').classList.toggle('open');
     document.getElementById('navBackdrop').classList.toggle('show');
@@ -969,7 +1144,6 @@ flowchart TD
     currentPhase = index;
     document.getElementById('pageIndicator').textContent = (index + 1) + ' / ' + totalPhases;
     document.getElementById('main').scrollTop = 0;
-    // Close nav drawer on mobile after selection
     closeNav();
     await renderPhase(index);
   }
@@ -977,14 +1151,166 @@ flowchart TD
   function nextPhase() { if (currentPhase < totalPhases - 1) showPhase(currentPhase + 1); }
   function prevPhase() { if (currentPhase > 0) showPhase(currentPhase - 1); }
 
+  // PDF Export — opens a print-friendly window with diagrams scaled to fit
+  // exactly one A4 landscape page each, text/annotations on following pages.
+  async function exportPDF(index) {
+    const btn = event.target;
+    const origText = btn.textContent;
+    btn.textContent = 'Preparing...';
+    btn.classList.add('exporting');
+
+    await renderPhase(index);
+
+    const phase = document.getElementById('phase-' + index);
+    const phaseTitle = phase.querySelector('h2').textContent;
+
+    // Collect diagram SVGs — serialize them with explicit viewBox so they scale cleanly
+    const diagramSVGs = [];
+    phase.querySelectorAll('.diagram-wrap svg').forEach(svg => {
+      const s = svg.cloneNode(true);
+      // Ensure viewBox is set from width/height if missing
+      if (!s.getAttribute('viewBox')) {
+        const w = parseFloat(s.getAttribute('width')) || svg.getBoundingClientRect().width;
+        const h = parseFloat(s.getAttribute('height')) || svg.getBoundingClientRect().height;
+        s.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      }
+      // Remove fixed width/height so CSS can control sizing
+      s.removeAttribute('width');
+      s.removeAttribute('height');
+      s.removeAttribute('style');
+      diagramSVGs.push(s.outerHTML);
+    });
+
+    // Collect non-diagram content (annotations, tables, sub-phase labels)
+    let textContent = '';
+    for (const child of phase.children) {
+      if (child.classList.contains('phase-header') || child.classList.contains('phase-desc') || child.classList.contains('diagram-wrap')) continue;
+      textContent += child.outerHTML;
+    }
+
+    // Build the print page — each diagram gets its own page, text follows
+    const printWindow = window.open('', '_blank');
+    let diagramPages = '';
+    diagramSVGs.forEach((svgHtml, i) => {
+      // Find the sub-phase label that precedes this diagram (if any)
+      const wraps = phase.querySelectorAll('.diagram-wrap');
+      let label = '';
+      if (wraps[i]) {
+        const prev = wraps[i].previousElementSibling;
+        if (prev && prev.classList.contains('sub-phase-label')) {
+          label = '<div class="sub-phase-label' + (prev.classList.contains('variant-b') ? ' variant-b' : '') + '">' + prev.textContent + '</div>';
+          // Remove from textContent so it's not duplicated
+          textContent = textContent.replace(prev.outerHTML, '');
+        }
+      }
+      diagramPages += `
+        <div class="diagram-page">
+          ${i === 0 ? '<h2>' + phaseTitle + '</h2>' : ''}
+          ${label}
+          <div class="diagram-wrap">${svgHtml}</div>
+        </div>`;
+    });
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>${phaseTitle} — Vivamen</title>
+<style>
+  @page { size: A4 landscape; margin: 10mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }
+
+  h2 { font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 8px; padding: 0 10px; }
+
+  /* Each diagram fills exactly one landscape page */
+  .diagram-page {
+    width: 277mm;    /* A4 landscape minus margins */
+    height: 190mm;   /* A4 landscape minus margins */
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    overflow: hidden;
+  }
+  .diagram-page:last-of-type { page-break-after: auto; }
+
+  .diagram-wrap {
+    background: #fff;
+    border-radius: 8px;
+    padding: 10px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .diagram-wrap svg {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  /* Text pages */
+  .text-pages { padding: 15px 20px; }
+  .text-pages h2 { margin-bottom: 12px; }
+
+  .phase-desc { font-size: 12px; color: #888; margin-bottom: 16px; line-height: 1.5; }
+  .phase-desc strong { color: #b0b0b0; }
+
+  .annotation { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 14px; margin-bottom: 14px; font-size: 11px; line-height: 1.6; page-break-inside: avoid; }
+  .annotation h3 { color: #60a5fa; font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .annotation h4 { color: #fff; font-size: 11px; margin: 10px 0 4px; }
+  .annotation li { margin-bottom: 3px; }
+  .annotation strong { color: #fff; }
+  .warn { color: #fbbf24; font-weight: 700; }
+  .highlight { color: #60a5fa; font-weight: 600; }
+
+  .badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; }
+  .badge-blue { background: #1e3a5f; color: #60a5fa; }
+  .badge-purple { background: #3b1f5e; color: #a78bfa; }
+
+  .sub-phase-label { background: #eef6ff; color: #1e3a5f; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; margin: 8px 10px; }
+  .sub-phase-label.variant-b { background: #f3eeff; color: #3b1f5e; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 8px; }
+  th { background: #22253a; color: #60a5fa; padding: 5px 7px; text-align: left; border: 1px solid #2a2d3a; }
+  td { padding: 5px 7px; border: 1px solid #2a2d3a; }
+  .table-wrap { overflow: visible; margin-bottom: 14px; }
+  .ref-table { width: 100%; }
+  .info-table { width: 100%; }
+
+  .print-hint { text-align: center; padding: 10px; color: #888; font-size: 12px; border-bottom: 1px solid #2a2d3a; margin-bottom: 10px; }
+  .print-hint strong { color: #60a5fa; }
+
+  @media print {
+    .print-hint { display: none; }
+  }
+</style>
+</head><body>
+<div class="print-hint">Press <strong>Ctrl+P</strong> (or Cmd+P) → Save as PDF. Layout: <strong>A4 Landscape</strong>, Background graphics: <strong>ON</strong>. Each diagram fits one page, annotations follow.</div>
+${diagramPages}
+${textContent ? '<div class="text-pages"><h2>' + phaseTitle + ' — Notes</h2>' + textContent + '</div>' : ''}
+</body></html>`);
+    printWindow.document.close();
+
+    // Wait for SVGs to render, then auto-print
+    setTimeout(() => {
+      printWindow.print();
+    }, 1000);
+
+    btn.textContent = origText;
+    btn.classList.remove('exporting');
+  }
+
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextPhase(); }
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prevPhase(); }
   });
 
-  // Touch swipe support for navigating phases on mobile
-  let touchStartX = 0;
-  let touchStartY = 0;
+  // Touch swipe
+  let touchStartX = 0, touchStartY = 0;
   document.getElementById('main').addEventListener('touchstart', e => {
     touchStartX = e.changedTouches[0].screenX;
     touchStartY = e.changedTouches[0].screenY;
@@ -992,14 +1318,11 @@ flowchart TD
   document.getElementById('main').addEventListener('touchend', e => {
     const dx = e.changedTouches[0].screenX - touchStartX;
     const dy = e.changedTouches[0].screenY - touchStartY;
-    // Only trigger if horizontal swipe is dominant and > 80px
     if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      if (dx < 0) nextPhase();
-      else prevPhase();
+      if (dx < 0) nextPhase(); else prevPhase();
     }
   }, { passive: true });
 
-  // Render only the initially visible phase
   renderPhase(0);
 </script>
 
