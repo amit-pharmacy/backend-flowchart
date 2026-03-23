@@ -53,6 +53,12 @@
   .badge-blue { background: #1e3a5f40; color: #60a5fa; }
   .badge-purple { background: #3b1f5e40; color: #a78bfa; }
 
+  /* PDF Export button */
+  .pdf-btn { background: #22253a; border: 1px solid #3a3d4a; color: #e0e0e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; }
+  .pdf-btn:hover { background: #2a3a5a; border-color: #60a5fa; color: #fff; }
+  .pdf-btn.exporting { opacity: 0.5; pointer-events: none; }
+  .title-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+
   /* Divider */
   .divider { border: none; border-top: 1px solid #2a2d3a; margin: 36px 0; }
 
@@ -82,7 +88,10 @@
 <main>
 
 <!-- ============ OVERVIEW FLOWCHART ============ -->
-<h2 class="section-title">Full Flow Overview</h2>
+<div class="title-row">
+  <h2 class="section-title" style="margin:0">Full Flow Overview</h2>
+  <button class="pdf-btn" onclick="exportPDF()">&#128196; Export PDF</button>
+</div>
 <p class="section-desc">Bird's-eye view of the entire backend — every phase shown. <strong>Green</strong> = happy path. <strong>Red</strong> = exit/rejection. <strong>Purple</strong> = instalment path. <strong>Dashed</strong> = external API. Side labels show which APIs are used at each stage.</p>
 
 <div class="diagram-wrap">
@@ -256,6 +265,94 @@ flowchart TD
     flowchart: { curve: 'basis', padding: 20, nodeSpacing: 30, rankSpacing: 40, htmlLabels: true },
     themeVariables: { fontSize: '13px' }
   });
+
+  function exportPDF() {
+    const btn = event.target;
+    const origText = btn.textContent;
+    btn.textContent = 'Preparing...';
+    btn.classList.add('exporting');
+
+    // Collect diagram SVG
+    const diagramSVGs = [];
+    document.querySelectorAll('.diagram-wrap svg').forEach(svg => {
+      const s = svg.cloneNode(true);
+      if (!s.getAttribute('viewBox')) {
+        const w = parseFloat(s.getAttribute('width')) || svg.getBoundingClientRect().width;
+        const h = parseFloat(s.getAttribute('height')) || svg.getBoundingClientRect().height;
+        s.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      }
+      s.removeAttribute('width');
+      s.removeAttribute('height');
+      s.removeAttribute('style');
+      diagramSVGs.push(s.outerHTML);
+    });
+
+    // Collect all non-diagram content (annotations, tables, dividers)
+    let textContent = '';
+    const main = document.querySelector('main');
+    for (const child of main.children) {
+      if (child.classList.contains('diagram-wrap') || child.classList.contains('title-row') || (child.classList.contains('section-desc') && textContent === '')) continue;
+      if (child.classList.contains('diagram-wrap')) continue;
+      textContent += child.outerHTML;
+    }
+
+    const printWindow = window.open('', '_blank');
+    let diagramPages = '';
+    diagramSVGs.forEach((svgHtml, i) => {
+      diagramPages += '<div class="diagram-page"><div class="diagram-wrap">' + svgHtml + '</div></div>';
+    });
+
+    printWindow.document.write('<!DOCTYPE html>\n<html><head>\n<meta charset="UTF-8">\n<title>Vivamen Developer Overview — PDF</title>\n<style>\n' +
+      '@page { size: A4 landscape; margin: 10mm; }\n' +
+      '* { margin: 0; padding: 0; box-sizing: border-box; }\n' +
+      'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }\n' +
+      'h2 { font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px; }\n' +
+      '.diagram-page { width: 277mm; height: 190mm; page-break-after: always; display: flex; flex-direction: column; padding: 5px; overflow: hidden; }\n' +
+      '.diagram-page:last-of-type { page-break-after: auto; }\n' +
+      '.diagram-wrap { background: #fff; border-radius: 8px; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }\n' +
+      '.diagram-wrap svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }\n' +
+      '.text-pages { padding: 15px 20px; }\n' +
+      '.text-pages h2 { margin-bottom: 12px; }\n' +
+      '.section-title { font-size: 15px; font-weight: 700; color: #fff; margin: 20px 0 6px; }\n' +
+      '.section-desc { font-size: 11px; color: #888; margin-bottom: 12px; line-height: 1.5; }\n' +
+      '.section-desc strong { color: #b0b0b0; }\n' +
+      '.annotation { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 14px; margin-bottom: 14px; font-size: 11px; line-height: 1.6; page-break-inside: avoid; }\n' +
+      '.annotation h3 { color: #60a5fa; font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }\n' +
+      '.annotation h4 { color: #fff; font-size: 11px; margin: 10px 0 4px; }\n' +
+      '.annotation li { margin-bottom: 3px; }\n' +
+      '.annotation strong { color: #fff; }\n' +
+      '.warn { color: #fbbf24; font-weight: 700; }\n' +
+      '.highlight { color: #60a5fa; font-weight: 600; }\n' +
+      '.badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; }\n' +
+      '.badge-green { background: #065f4620; color: #34d399; }\n' +
+      '.badge-red { background: #7f1d1d20; color: #f87171; }\n' +
+      '.badge-orange { background: #78350f20; color: #fbbf24; }\n' +
+      '.badge-blue { background: #1e3a5f; color: #60a5fa; }\n' +
+      '.badge-purple { background: #3b1f5e; color: #a78bfa; }\n' +
+      'table { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 8px; }\n' +
+      'th { background: #22253a; color: #60a5fa; padding: 5px 7px; text-align: left; border: 1px solid #2a2d3a; }\n' +
+      'td { padding: 5px 7px; border: 1px solid #2a2d3a; }\n' +
+      '.table-wrap { overflow: visible; margin-bottom: 14px; }\n' +
+      '.ref-table { width: 100%; }\n' +
+      '.divider { border: none; border-top: 1px solid #2a2d3a; margin: 16px 0; }\n' +
+      '.title-row { display: none; }\n' +
+      '.print-hint { text-align: center; padding: 10px; color: #888; font-size: 12px; border-bottom: 1px solid #2a2d3a; margin-bottom: 10px; }\n' +
+      '.print-hint strong { color: #60a5fa; }\n' +
+      '@media print { .print-hint { display: none; } }\n' +
+      '</style>\n</head><body>\n' +
+      '<div class="print-hint">Press <strong>Ctrl+P</strong> (or Cmd+P) → Save as PDF. Layout: <strong>A4 Landscape</strong>, Background graphics: <strong>ON</strong>. Flowchart on page 1, reference tables follow.</div>\n' +
+      diagramPages +
+      '<div class="text-pages"><h2>Vivamen Developer Overview — Reference</h2>' + textContent + '</div>\n' +
+      '</body></html>');
+    printWindow.document.close();
+
+    setTimeout(function() {
+      printWindow.print();
+    }, 1000);
+
+    btn.textContent = origText;
+    btn.classList.remove('exporting');
+  }
 </script>
 </body>
 </html>
