@@ -176,12 +176,24 @@ flowchart TD
   ID -->|YES| P5
   ID -->|FAIL| IDX["&#10006; Rejected + Refund"]:::redNode
 
-  P5["<b>Phase 5</b><br>Clinical Review Queue<br>&amp; Notification"]
-  P5 --> P6["<b>Phase 6</b><br>Prescriber / Pharmacist<br>Reviews Case"]
-  P6 --> DEC{"Decision?"}
+  P5["<b>Phase 5</b><br>Review Queue<br>&amp; Notification"]
+  P5 --> CLASS{"Product<br>classification?"}
+
+  CLASS -->|POM| P6_POM["<b>Phase 6</b><br>Prescriber Reviews"]:::pomNode
+  CLASS -->|"P item"| P6_P["<b>Phase 6</b><br>Pharmacist Reviews"]:::pItemNode
+  CLASS -->|"GSL / Test Kit"| P6_GSL["<b>Phase 6</b><br>Pharmacy Team<br>Processes"]:::gslNode
+
+  P6_POM --> DEC{"Decision?"}
   DEC -->|APPROVE| P7_SPLIT{"Order type?"}
-  DEC -->|MORE INFO| P6
+  DEC -->|MORE INFO| P6_POM
   DEC -->|DENY| DENR["&#10006; Denied + Refund"]:::redNode
+
+  P6_P --> DEC_P{"Decision?"}
+  DEC_P -->|APPROVE| P8
+  DEC_P -->|MORE INFO| P6_P
+  DEC_P -->|DENY| DENR
+
+  P6_GSL --> P8
 
   P7_SPLIT -->|ONE-OFF| P7A["<b>Phase 7A</b><br>Single Rx<br>(one order)"]:::pathA
   P7_SPLIT -->|INSTALMENT| P7B["<b>Phase 7B</b><br>Single Rx covering<br>full plan period"]:::pathB
@@ -232,6 +244,9 @@ flowchart TD
   classDef supportNode fill:#f0f4ff,stroke:#93c5fd,color:#1e3a5f,stroke-width:1px,stroke-dasharray: 5 5
   classDef pathA fill:#1e3a5f,stroke:#60a5fa,color:#fff,stroke-width:2px
   classDef pathB fill:#3b1f5e,stroke:#a78bfa,color:#fff,stroke-width:2px
+  classDef pomNode fill:#7f1d1d,stroke:#f87171,color:#fff,stroke-width:2px
+  classDef pItemNode fill:#1e3a5f,stroke:#818cf8,color:#fff,stroke-width:2px
+  classDef gslNode fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
   classDef apiLabel fill:#f5f3ff,stroke:#a78bfa,color:#5b21b6,stroke-width:1px,stroke-dasharray: 3 3,font-size:11px
 </pre>
 </div>
@@ -245,7 +260,7 @@ flowchart TD
 <li><strong>Instalment renewal:</strong> Pharmacy auto-dispatches monthly (no prescriber re-review). At plan end, patient re-confirms. After 12 months total → fresh consultation required.</li>
 <li><strong>Renewal overlap flag:</strong> If a patient triggers a renewal while a previous plan is still active, this is prominently flagged to both the prescriber (Phase 6) and pharmacy team (dispatch) so they can assess whether overlapping supply is appropriate.</li>
 <li><strong>Answer expiry (grace period):</strong> After a plan or order ends, the patient has a grace period of <strong>plan duration + 1 month</strong> to reorder. If that window passes, all consultation answers are cleared and they must start a fresh consultation. (e.g. 3-month plan = 4-month grace, 6-month plan = 7-month grace, one-off = 1 month grace). Configurable per product.</li>
-<li><strong>POM vs P:</strong> POM requires prescriber + SignatureRx Rx. P requires pharmacist approval (logged, no Rx). Both support instalments.</li>
+<li><strong>Three product classifications:</strong> <span class="badge badge-red">POM</span> → prescriber reviews + Rx + e-signing in SignatureRx. <span class="badge badge-blue">P (Pharmacy)</span> → pharmacist reviews + approves (logged &amp; timestamped, no e-signing). <span class="badge badge-green">GSL / Test Kit</span> → pharmacy team processes directly (no clinical review needed). All three paths support instalments.</li>
 </ul>
 </div>
 </div>
@@ -473,18 +488,31 @@ flowchart TD
 flowchart TD
   A["Consultation enters<br>clinical review queue"]
   A --> B["Dashboard shows:<br>reference, patient, category,<br>POM/P type, ID status,<br>order type (one-off / instalment),<br>instalment count, repeat flag,<br><b>renewal flag if repeat instalment</b>"]
-  B --> C{"Product type?"}
-  C -->|POM| D["Notification email sent<br>to <b>prescriber(s)</b>"]:::apiNode
-  C -->|P item| E["Notification email sent<br>to <b>pharmacist(s)</b>"]:::apiNode
+  B --> C{"Product<br>classification?"}
+  C -->|POM| D["Notification email sent<br>to <b>prescriber(s)</b>"]:::pomNode
+  C -->|P item| E["Notification email sent<br>to <b>pharmacist(s)</b>"]:::pNode
+  C -->|"GSL / Test Kit"| GK["Notification sent<br>to <b>pharmacy team</b>"]:::gslNode
   D --> F["→ PHASE 6:<br>Prescriber reviews case"]:::nextPhase
-  E --> F
+  E --> F2["→ PHASE 6:<br>Pharmacist reviews case"]:::nextPhase
+  GK --> F3["→ PHASE 6:<br>Team processes order"]:::nextPhase
 
-  classDef apiNode fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-dasharray: 5 5
+  classDef pomNode fill:#fef2f2,stroke:#f87171,color:#991b1b,stroke-width:2px
+  classDef pNode fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px
+  classDef gslNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
   classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
 </pre>
 </div>
 <div class="annotation">
 <h3>Annotation</h3>
+<h4>Three routing paths by product classification</h4>
+<div class="table-wrap">
+<table class="ref-table">
+<tr><th>Classification</th><th>Queue</th><th>Review in Phase 6</th><th>Example</th></tr>
+<tr><td><span class="badge badge-red">POM</span></td><td>Prescriber queue</td><td>Full clinical review → Rx + e-signing (Phase 7)</td><td>Finasteride, Sildenafil</td></tr>
+<tr><td><span class="badge badge-blue">P (Pharmacy)</span></td><td>Pharmacist queue</td><td>Pharmacist reviews &amp; approves (logged, timestamped, auditable — no e-signing)</td><td>Viagra Connect</td></tr>
+<tr><td><span class="badge badge-green">GSL / Test Kit</span></td><td>Pharmacy team queue</td><td>Team processes &amp; takes forward (no clinical review needed)</td><td>Test kits, GSL products</td></tr>
+</table>
+</div>
 <h4>Notification email (secure, limited details)</h4>
 <ul>
 <li><strong>Contains:</strong> consultation reference, product category, type (POM/P), <span class="highlight">order type (one-off or instalment + count)</span>, date/time, direct link to case</li>
@@ -512,33 +540,43 @@ flowchart TD
   <h2>Phase 6: Prescriber / Pharmacist Questionnaire Review</h2>
   <button class="pdf-btn" onclick="exportPDF(6)">&#128196; Export PDF</button>
 </div>
-<p class="phase-desc">The clinician logs into the website backend, opens the case, and reviews the full consultation questionnaire before making their clinical decision. This is the same person who will go on to sign the prescription in Phase 7 (if approved).</p>
+<p class="phase-desc">Three different review paths depending on the product classification. <strong>POM</strong> → prescriber reviews and signs Rx. <strong>P (Pharmacy)</strong> → pharmacist reviews and approves (logged + timestamped, no e-signing). <strong>GSL / Test Kits</strong> → pharmacy team processes directly.</p>
 <div class="diagram-wrap">
 <pre class="mermaid">
 flowchart TD
-  A["Clinician clicks link<br>in notification email<br>(or opens queue manually)"]
-  A --> B["Logs into website backend"]
-  B --> C["Opens patient case"]
-  C --> D["<b>Reviews full consultation:</b><br>• All questions and answers<br>• ID verification status<br>• Patient history<br>• Any messages from patient<br>• Repeat submission flag<br>• Order type: one-off or instalment<br>• Instalment duration (if applicable)<br>• <b>Renewal flag + previous plan</b><br><b>history (if repeat instalment)</b>"]
-  D --> E{"Clinical decision?"}
-  E -->|APPROVE| F["Approved &#10003;"]:::greenNode
-  F --> G{"POM or P?"}
-  G -->|POM| H["→ PHASE 7:<br>Rx &amp; E-Signing"]:::nextPhase
-  G -->|P item| H2["Pharmacist approval<br>logged (no Rx needed)<br>→ PHASE 8: Triggers"]:::nextPhase
-  E -->|REQUEST MORE INFO| I["Clinician types message<br>for the patient"]:::orangeNode
-  I --> J["Message sent via<br>messaging centre +<br>email notification"]
-  J --> K["Status: <b>Awaiting<br>Patient Response</b>"]:::orangeNode
-  K --> L["Patient replies"]
-  L --> D
-  E -->|DENY| M["Select denial reason<br>(from predefined list)"]:::redNode
-  M --> N["Add clinical notes<br><b>(mandatory)</b>"]
-  N --> O["Status: <b>Rejected —<br>Awaiting Refund</b>"]
-  O --> P["Team issues refund"]
-  P --> Q{"Refund confirmed?"}
-  Q -->|YES| R["Email patient:<br>denied + refund + advise GP"]
-  R --> S["END — Clinically<br>Denied &amp; Refunded"]:::redEnd
-  Q -->|NO| T["Stays in Awaiting<br>Refund queue"]:::orangeNode
+  START{"Product<br>classification?"}
 
+  START -->|POM| A_POM["<b>PRESCRIBER REVIEW</b>"]:::pomHeader
+  A_POM --> B_POM["Prescriber logs in,<br>opens patient case"]
+  B_POM --> C_POM["<b>Reviews full consultation:</b><br>• All Q&amp;As, ID status, history<br>• Messages, repeat flag<br>• Order type + instalment duration<br>• <b>Renewal flag + prev. plan history</b>"]
+  C_POM --> D_POM{"Clinical decision?"}
+  D_POM -->|APPROVE| E_POM["Approved &#10003;"]:::greenNode
+  E_POM --> F_POM["→ PHASE 7:<br>Rx &amp; E-Signing"]:::nextPhase
+  D_POM -->|MORE INFO| G_POM["Message patient<br>via messaging centre"]:::orangeNode
+  G_POM --> H_POM["Awaiting Patient Response"]:::orangeNode
+  H_POM --> C_POM
+  D_POM -->|DENY| I_POM["Denial reason +<br>clinical notes (mandatory)"]:::redNode
+  I_POM --> J_POM["Rejected → Refund →<br>Patient notified"]:::redEnd
+
+  START -->|"P item<br>(e.g. Viagra Connect)"| A_P["<b>PHARMACIST REVIEW</b>"]:::pHeader
+  A_P --> B_P["Pharmacist logs in,<br>opens patient case"]
+  B_P --> C_P["Reviews consultation<br>(same data as POM)"]
+  C_P --> D_P{"Decision?"}
+  D_P -->|APPROVE| E_P["Approved &#10003;<br><i>Logged: pharmacist ID,<br>timestamp, decision</i>"]:::greenNode
+  E_P --> F_P["No Rx needed — skip Phase 7<br>→ PHASE 8: Triggers"]:::nextPhase
+  D_P -->|MORE INFO| G_P["Message patient"]:::orangeNode
+  G_P --> C_P
+  D_P -->|DENY| I_P["Denial + refund"]:::redEnd
+
+  START -->|"GSL / Test Kit"| A_GSL["<b>PHARMACY TEAM</b>"]:::gslHeader
+  A_GSL --> B_GSL["Team member opens order"]
+  B_GSL --> C_GSL["Checks: stock, delivery address,<br>any flags"]
+  C_GSL --> D_GSL["Processes order &#10003;"]:::greenNode
+  D_GSL --> E_GSL["No clinical review needed<br>→ PHASE 8: Triggers"]:::nextPhase
+
+  classDef pomHeader fill:#fef2f2,stroke:#f87171,color:#991b1b,stroke-width:2px,font-weight:bold
+  classDef pHeader fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,font-weight:bold
+  classDef gslHeader fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px,font-weight:bold
   classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
   classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
   classDef redNode fill:#fef2f2,stroke:#f87171,color:#991b1b,stroke-width:2px
@@ -548,11 +586,18 @@ flowchart TD
 </div>
 <div class="annotation">
 <h3>Annotation</h3>
-<h4>This is where the clinical decision happens</h4>
+<h4>Three review paths</h4>
+<div class="table-wrap">
+<table class="ref-table">
+<tr><th>Classification</th><th>Who reviews</th><th>What happens on approval</th><th>Audit record</th></tr>
+<tr><td><span class="badge badge-red">POM</span></td><td>Registered prescriber</td><td>Full Rx generated + e-signed in SignatureRx (Phase 7)</td><td>Signed Rx hash, timestamp, prescriber ID</td></tr>
+<tr><td><span class="badge badge-blue">P (Pharmacy)</span></td><td>Pharmacist</td><td>Approval logged — <strong>no Rx or e-signing needed</strong>. Skips Phase 7 → Phase 8</td><td>Pharmacist ID, timestamp, decision logged</td></tr>
+<tr><td><span class="badge badge-green">GSL / Test Kit</span></td><td>Pharmacy team</td><td>Order processed directly — <strong>no clinical review needed</strong>. Skips Phase 7 → Phase 8</td><td>Team member ID, timestamp</td></tr>
+</table>
+</div>
 <ul>
-<li>Phase 5 was the <strong>notification and queue entry</strong>. Phase 6 is where the prescriber/pharmacist <strong>actually logs in, reads everything, and decides</strong>.</li>
-<li>This is the same person who will (if approved) go on to generate and sign the prescription in Phase 7.</li>
-<li>The split between Phase 5 and Phase 6 is <strong>deliberate</strong> — it makes it clear to the developer that these are two distinct system states: "waiting in queue" vs "actively being reviewed".</li>
+<li>Phase 5 was the <strong>notification and queue entry</strong>. Phase 6 is where the reviewer <strong>actually logs in and takes action</strong>.</li>
+<li>The split between Phase 5 and Phase 6 is <strong>deliberate</strong> — two distinct system states: "waiting in queue" vs "actively being reviewed".</li>
 </ul>
 <h4>One-off vs instalment awareness</h4>
 <ul>
@@ -569,11 +614,18 @@ flowchart TD
 <li>If previous plan is <strong>still active</strong> (patient triggered reorder early), this is <span class="warn">highlighted in amber</span> so the prescriber can assess whether overlapping supply is clinically appropriate</li>
 <li>Prescriber sees total cumulative treatment duration to date — this is critical for the 12-month hard limit check</li>
 </ul>
-<h4>P items (Pharmacy Medicines)</h4>
+<h4>P items (Pharmacy Medicines) — e.g. Viagra Connect</h4>
 <ul>
-<li>For P items, the pharmacist makes the same review and decision</li>
-<li>If approved, the pharmacist's approval is <strong>logged</strong> (decision, pharmacist ID, timestamp) — but no formal Rx is generated</li>
-<li>The flow skips Phase 7 and goes directly to Phase 8 (post-approval triggers)</li>
+<li>Pharmacist reviews and <strong>simply approves</strong> — no e-signing flow needed</li>
+<li>Approval is <strong>logged and auditable</strong>: pharmacist ID, timestamp, decision recorded</li>
+<li>Flow skips Phase 7 entirely → straight to Phase 8 (post-approval triggers)</li>
+</ul>
+<h4>GSL / Test Kits</h4>
+<ul>
+<li>No clinical review required — pharmacy team processes the order directly</li>
+<li>Team checks stock, delivery address, and any flags</li>
+<li>Flow skips Phase 7 entirely → straight to Phase 8 (post-approval triggers)</li>
+<li>Logged: team member ID + timestamp for audit</li>
 </ul>
 <h4>Denial</h4>
 <ul>
