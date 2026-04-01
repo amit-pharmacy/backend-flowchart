@@ -113,6 +113,29 @@
 </head>
 <body>
 
+<!-- Password Gate -->
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#0f1117;position:fixed;top:0;left:0;z-index:9999;">
+  <div style="text-align:center;max-width:360px;width:90%;">
+    <div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:1px;">VIVAMEN</div>
+    <div style="font-size:12px;color:#666;margin-bottom:32px;">Pharmacy Backend Flowchart</div>
+    <form id="authForm" onsubmit="return checkAuth(event)">
+      <input id="authPass" type="password" placeholder="Enter password" autofocus
+        style="width:100%;padding:14px 18px;border-radius:8px;border:1px solid #2a2d3a;background:#1a1d27;color:#e0e0e0;font-size:14px;outline:none;margin-bottom:12px;">
+      <button type="submit"
+        style="width:100%;padding:12px;border-radius:8px;border:none;background:#60a5fa;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">
+        Unlock
+      </button>
+    </form>
+    <div id="authError" style="color:#f87171;font-size:13px;margin-top:12px;display:none;">Incorrect password</div>
+  </div>
+</div>
+<script>
+async function sha256(str){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+const HASH='7ab62e107f337d84178fb05138499c20ff2445cd35d4ca5f57295666e09b568d';
+if(sessionStorage.getItem('viva_auth')==='1'){document.getElementById('authGate').style.display='none';}
+async function checkAuth(e){e.preventDefault();const h=await sha256(document.getElementById('authPass').value);if(h===HASH){sessionStorage.setItem('viva_auth','1');document.getElementById('authGate').style.display='none';}else{document.getElementById('authError').style.display='block';document.getElementById('authPass').value='';}}
+</script>
+
 <button class="hamburger" id="hamburger" onclick="toggleNav()" aria-label="Open navigation">&#9776;</button>
 <div class="nav-backdrop" id="navBackdrop" onclick="closeNav()"></div>
 
