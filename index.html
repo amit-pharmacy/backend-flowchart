@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vivamen — Pharmacy Backend Flowchart</title>
+<title>Viva — Pharmacy Backend Flowchart</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
@@ -116,7 +116,7 @@
 <!-- Password Gate -->
 <div id="authGate" style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#0f1117;position:fixed;top:0;left:0;z-index:9999;">
   <div style="text-align:center;max-width:360px;width:90%;">
-    <div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:1px;">VIVAMEN</div>
+    <div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:1px;">VIVA</div>
     <div style="font-size:12px;color:#666;margin-bottom:32px;">Pharmacy Backend Flowchart</div>
     <form id="authForm" onsubmit="return checkAuth(event)">
       <input id="authPass" type="password" placeholder="Enter password" autofocus
@@ -140,7 +140,7 @@ async function checkAuth(e){e.preventDefault();const h=await sha256(document.get
 <div class="nav-backdrop" id="navBackdrop" onclick="closeNav()"></div>
 
 <nav id="sideNav">
-  <h1>VIVAMEN</h1>
+  <h1>VIVA</h1>
   <div class="subtitle">Pharmacy Backend Flowchart</div>
   <div class="nav-section">Patient Journey</div>
   <button class="active" onclick="showPhase(0)"><span class="phase-num">—</span> Overview</button>
@@ -740,10 +740,10 @@ flowchart TD
 </div>
 <h4>Where things happen — the API round-trip</h4>
 <ul>
-<li><strong>Step 1 — Vivamen backend (outbound API call):</strong> Prescriber clicks "Generate Prescription" → our website sends Rx data to SignatureRx via their <span class="badge badge-blue">API</span></li>
+<li><strong>Step 1 — Viva backend (outbound API call):</strong> Prescriber clicks "Generate Prescription" → our website sends Rx data to SignatureRx via their <span class="badge badge-blue">API</span></li>
 <li><strong>Step 2 — SignatureRx (external platform):</strong> The prescription is created and the prescriber signs it inside SignatureRx. All MFA and e-signing is handled <strong>entirely within SignatureRx</strong> — not on our website</li>
-<li><strong>Step 3 — SignatureRx → Vivamen backend (inbound webhook / API callback):</strong> Once signed, SignatureRx sends a <span class="badge badge-purple">webhook</span> back to our website with the signed Rx data (hash, timestamp, prescriber details)</li>
-<li><strong>Step 4 — Vivamen backend (automatic triggers):</strong> Our website backend receives the webhook and <span class="highlight">immediately triggers Phase 8 actions</span>: GP letter generated, patient notified, <strong>pharmacy team notified that the Rx is ready</strong> — all fired automatically from the webhook handler, with no manual step in between</li>
+<li><strong>Step 3 — SignatureRx → Viva backend (inbound webhook / API callback):</strong> Once signed, SignatureRx sends a <span class="badge badge-purple">webhook</span> back to our website with the signed Rx data (hash, timestamp, prescriber details)</li>
+<li><strong>Step 4 — Viva backend (automatic triggers):</strong> Our website backend receives the webhook and <span class="highlight">immediately triggers Phase 8 actions</span>: GP letter generated, patient notified, <strong>pharmacy team notified that the Rx is ready</strong> — all fired automatically from the webhook handler, with no manual step in between</li>
 </ul>
 <p style="margin-top:8px;"><strong>Key point:</strong> The pharmacy team is informed <span class="highlight">the instant the prescriber signs</span>. There is no delay or manual handoff — the SignatureRx webhook hits our backend and the triggers fire automatically.</p>
 <h4>Rx is final</h4>
@@ -1010,7 +1010,7 @@ flowchart TD
   D --> E["Patient must tick<br>confirmation boxes:"]
   E --> E1["&#9745; I confirm my answers<br>are still accurate"]
   E1 --> E2["&#9745; Nothing has changed<br>in my medical history"]
-  E2 --> E3["&#9745; I consent to inform<br>Vivamen proactively<br>if anything changes"]
+  E2 --> E3["&#9745; I consent to inform<br>Viva proactively<br>if anything changes"]
   E3 --> F{"Does patient<br>want to renew?"}
   F -->|YES| G{"Within 12-month<br>hard limit?"}
   G -->|YES| H["New instalment plan starts"]:::pathB
@@ -1290,7 +1290,7 @@ flowchart TD
     printWindow.document.write(`<!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8">
-<title>${phaseTitle} — Vivamen</title>
+<title>${phaseTitle} — Viva</title>
 <style>
   @page { size: A4 landscape; margin: 10mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
