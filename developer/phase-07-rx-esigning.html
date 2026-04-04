@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viva — Phase 7: Rx Generation & E-Signing (7A / 7B)</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<style>* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }
+header { background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+header h1 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+header .subtitle { font-size: 12px; color: #666; margin-top: 2px; }
+header .dev-badge { display: inline-block; background: #065f46; color: #34d399; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 4px; margin-left: 12px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; }
+.back-link { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
+.pdf-btn { background: #22253a; border: 1px solid #3a3d4a; color: #e0e0e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; }
+.pdf-btn:hover { background: #2a3a5a; border-color: #60a5fa; color: #fff; }
+main { max-width: 1200px; margin: 0 auto; padding: 30px 40px 60px; }
+h2 { font-size: 22px; font-weight: 700; color: #fff; }
+.phase-desc { font-size: 14px; color: #888; margin-bottom: 24px; line-height: 1.5; }
+.phase-desc strong { color: #b0b0b0; }
+.phase-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 12px; }
+.diagram-wrap { background: #fff; border-radius: 12px; padding: 30px; margin-bottom: 24px; overflow-x: auto; cursor: grab; position: relative; }
+.diagram-wrap:active { cursor: grabbing; }
+.diagram-wrap svg { max-width: 100%; height: auto; }
+.diagram-wrap .zoom-hint { position: absolute; top: 10px; right: 14px; font-size: 11px; color: #999; background: #f5f5f5; padding: 3px 10px; border-radius: 4px; }
+.annotation { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.annotation h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.annotation h4 { font-size: 13px; font-weight: 700; color: #e0e0e0; margin: 16px 0 6px; }
+.annotation p, .annotation li { font-size: 13px; color: #b0b0b0; line-height: 1.7; }
+.annotation ul { padding-left: 18px; }
+.annotation li { margin-bottom: 4px; }
+.annotation .highlight { color: #fbbf24; font-weight: 600; }
+.annotation .warn { color: #f87171; font-weight: 600; }
+.sub-phase-label { display: inline-block; background: #1e3a5f; color: #60a5fa; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 6px; margin: 24px 0 12px; letter-spacing: 0.5px; }
+.sub-phase-label.variant-b { background: #3b1f5e; color: #a78bfa; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+.ref-table th { background: #22253a; color: #60a5fa; text-align: left; padding: 10px 14px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+.ref-table td { padding: 10px 14px; border-bottom: 1px solid #2a2d3a; color: #b0b0b0; }
+.ref-table tr:hover td { background: #1e2a4a22; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge-green { background: #065f4620; color: #34d399; }
+.badge-red { background: #7f1d1d20; color: #f87171; }
+.badge-orange { background: #78350f20; color: #fbbf24; }
+.badge-blue { background: #1e3a5f40; color: #60a5fa; }
+.badge-purple { background: #3b1f5e40; color: #a78bfa; }
+.phase-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #2a2d3a; }
+.phase-nav a { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 6px; border: 1px solid #2a2d3a; background: #1a1d27; transition: all 0.15s; }
+.phase-nav a:hover { background: #22253a; border-color: #60a5fa; }
+.phase-nav .disabled { opacity: 0.3; pointer-events: none; }
+@media (max-width: 768px) { header { padding: 16px 20px; } main { padding: 20px 16px 60px; } .diagram-wrap { padding: 16px; border-radius: 8px; } .diagram-wrap svg { max-width: none; min-width: 400px; } .annotation { padding: 16px; border-radius: 8px; } }</style>
+</head>
+<body>
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#0f1117;position:fixed;top:0;left:0;z-index:9999;"><div style="text-align:center;max-width:360px;width:90%;"><div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:1px;">VIVA</div><div style="font-size:12px;color:#666;margin-bottom:32px;">Pharmacy Backend Flowchart</div><form id="authForm" onsubmit="return checkAuth(event)"><input id="authPass" type="password" placeholder="Enter password" autofocus style="width:100%;padding:14px 18px;border-radius:8px;border:1px solid #2a2d3a;background:#1a1d27;color:#e0e0e0;font-size:14px;outline:none;margin-bottom:12px;"><button type="submit" style="width:100%;padding:12px;border-radius:8px;border:none;background:#60a5fa;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Unlock</button></form><div id="authError" style="color:#f87171;font-size:13px;margin-top:12px;display:none;">Incorrect password</div></div></div>
+<script>
+async function sha256(str){const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+const HASH="7ab62e107f337d84178fb05138499c20ff2445cd35d4ca5f57295666e09b568d";
+if(sessionStorage.getItem("viva_auth")==="1"){document.getElementById("authGate").style.display="none";}
+async function checkAuth(e){e.preventDefault();const h=await sha256(document.getElementById("authPass").value);if(h===HASH){sessionStorage.setItem("viva_auth","1");document.getElementById("authGate").style.display="none";}else{document.getElementById("authError").style.display="block";document.getElementById("authPass").value="";}}
+</script>
+<header>
+  <div>
+    <h1>VIVA <span class="dev-badge">Developer</span></h1>
+    <div class="subtitle">Phase 7: Rx Generation & E-Signing (7A / 7B)</div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <a href="index.html" class="back-link">&larr; All Phases</a>
+    <button class="pdf-btn" onclick="window.print()">&#128196; Print / PDF</button>
+  </div>
+</header>
+<main>
+
+
+<p class="phase-desc">The prescriber generates and signs the prescription inside SignatureRx. The flow splits into <span class="badge badge-blue">Phase 7A (one-off)</span> and <span class="badge badge-purple">Phase 7B (instalment)</span>. Both paths merge after signing. For P items, this phase is skipped — pharmacist approval in Phase 6 goes directly to Phase 8.</p>
+
+<div class="sub-phase-label">PHASE 7A — ONE-OFF ORDER</div>
+<div class="diagram-wrap">
+<pre class="mermaid">
+flowchart TD
+  A["Prescriber clicks<br><b>'Approve Treatment'</b>"]
+  A --> B["System auto-populates Rx fields<br>from consultation + product data"]
+  B --> C["Prescriber reviews / adjusts"]
+  C --> D["Order type shown:<br><b>ONE-OFF — single order</b>"]:::pathA
+  D --> E["Prescriber clicks<br><b>'Generate Prescription'</b>"]
+  E --> F["&#128279; <b>OUTBOUND API</b><br>Website → SignatureRx:<br>CREATE PRESCRIPTION"]:::apiOut
+  F --> G["SignatureRx returns<br>Rx reference ID"]:::apiIn
+  G --> H["Prescriber signs Rx<br><b>inside SignatureRx</b><br>(MFA + e-signing)"]:::external
+  H --> I["&#128279; <b>INBOUND API (WEBHOOK)</b><br>SignatureRx → Website:<br>Signed Rx + hash + timestamp"]:::apiIn
+  I --> J["<b>Website backend receives</b><br>signed Rx via webhook"]:::backendNode
+  J --> J2["Rx LOCKED —<br>signature is final"]:::greenNode
+  J2 --> K["Website backend<br><b>automatically triggers</b><br>Phase 8 actions:<br>GP Letter | Patient Msg |<br><b>Pharmacy Team Notified</b>"]:::triggerNode
+  K --> L["→ PHASE 8"]:::nextPhase
+
+  classDef pathA fill:#eef6ff,stroke:#60a5fa,color:#1e3a5f,stroke-width:2px
+  classDef apiOut fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,stroke-dasharray: 5 5
+  classDef apiIn fill:#f0e6ff,stroke:#a78bfa,color:#4c1d95,stroke-width:2px,stroke-dasharray: 5 5
+  classDef external fill:#fefce8,stroke:#ca8a04,color:#713f12,stroke-width:2px
+  classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
+  classDef backendNode fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:2px
+  classDef triggerNode fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
+  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
+</pre>
+</div>
+
+<div class="sub-phase-label variant-b">PHASE 7B — INSTALMENT ORDER</div>
+<div class="diagram-wrap">
+<pre class="mermaid">
+flowchart TD
+  A["Prescriber clicks<br><b>'Approve Treatment'</b>"]
+  A --> B["System auto-populates Rx fields +<br>instalment details"]
+  B --> C["Prescriber sees prominently:<br><b>INSTALMENT PLAN</b><br>Duration: X months<br>Instalment 1 of X<br><i>Can override plan length</i>"]:::pathB
+  C --> D["Prescriber reviews / adjusts"]
+  D --> E["Prescriber clicks<br><b>'Generate Prescription'</b>"]
+  E --> F["&#128279; <b>OUTBOUND API</b><br>Website → SignatureRx:<br>CREATE PRESCRIPTION<br>(covers full instalment period)"]:::apiOut
+  F --> G["SignatureRx returns<br>Rx reference ID"]:::apiIn
+  G --> H["Prescriber signs <b>single Rx</b><br>covering all instalments<br><b>inside SignatureRx</b><br>(MFA + e-signing)"]:::external
+  H --> I["&#128279; <b>INBOUND API (WEBHOOK)</b><br>SignatureRx → Website:<br>Signed Rx + hash + timestamp"]:::apiIn
+  I --> J["<b>Website backend receives</b><br>signed Rx via webhook"]:::backendNode
+  J --> J2["Rx LOCKED<br>Instalment plan recorded"]:::greenNode
+  J2 --> K["Website backend stores:<br>• Instalment 1 of X<br>• Next dispatch date<br>• Rx covers full period<br>• Renewal reminder date"]:::greenNode
+  K --> L["Website backend<br><b>automatically triggers</b><br>Phase 8 actions:<br>GP Letter | Patient Msg |<br><b>Pharmacy Team Notified</b>"]:::triggerNode
+  L --> M["→ PHASE 8"]:::nextPhase
+
+  classDef pathB fill:#f3eeff,stroke:#a78bfa,color:#3b1f5e,stroke-width:2px
+  classDef apiOut fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,stroke-dasharray: 5 5
+  classDef apiIn fill:#f0e6ff,stroke:#a78bfa,color:#4c1d95,stroke-width:2px,stroke-dasharray: 5 5
+  classDef external fill:#fefce8,stroke:#ca8a04,color:#713f12,stroke-width:2px
+  classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
+  classDef backendNode fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:2px
+  classDef triggerNode fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
+  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
+</pre>
+</div>
+
+<div class="annotation">
+<h3>Annotation</h3>
+<h4>Phase 7A vs 7B — key differences</h4>
+<div class="table-wrap">
+<table class="ref-table">
+<tr><th></th><th><span class="badge badge-blue">7A — One-Off</span></th><th><span class="badge badge-purple">7B — Instalment</span></th></tr>
+<tr><td>What patient selected</td><td>Single order</td><td>Instalment plan (e.g. 3, 6, or 12 months — configurable per product)</td></tr>
+<tr><td>What prescriber sees</td><td>"One-off order"</td><td>"Instalment plan — X months" (prominently displayed)</td></tr>
+<tr><td>Rx scope</td><td>Covers single order</td><td>Single Rx covering full instalment period</td></tr>
+<tr><td>After signing</td><td>One dispatch</td><td>Pharmacy auto-dispatches monthly (Instalment X of Y)</td></tr>
+<tr><td>Renewal</td><td>Patient reorders manually</td><td>Patient reminded at month X-1 to re-confirm (Phase 13)</td></tr>
+</table>
+</div>
+<h4>Where things happen — the API round-trip</h4>
+<ul>
+<li><strong>Step 1 — Viva backend (outbound API call):</strong> Prescriber clicks "Generate Prescription" → our website sends Rx data to SignatureRx via their <span class="badge badge-blue">API</span></li>
+<li><strong>Step 2 — SignatureRx (external platform):</strong> The prescription is created and the prescriber signs it inside SignatureRx. All MFA and e-signing is handled <strong>entirely within SignatureRx</strong> — not on our website</li>
+<li><strong>Step 3 — SignatureRx → Viva backend (inbound webhook / API callback):</strong> Once signed, SignatureRx sends a <span class="badge badge-purple">webhook</span> back to our website with the signed Rx data (hash, timestamp, prescriber details)</li>
+<li><strong>Step 4 — Viva backend (automatic triggers):</strong> Our website backend receives the webhook and <span class="highlight">immediately triggers Phase 8 actions</span>: GP letter generated, patient notified, <strong>pharmacy team notified that the Rx is ready</strong> — all fired automatically from the webhook handler, with no manual step in between</li>
+</ul>
+<p style="margin-top:8px;"><strong>Key point:</strong> The pharmacy team is informed <span class="highlight">the instant the prescriber signs</span>. There is no delay or manual handoff — the SignatureRx webhook hits our backend and the triggers fire automatically.</p>
+<h4>Rx is final</h4>
+<ul>
+<li>Once the prescriber signs, the prescription is <span class="highlight">locked and final</span></li>
+<li>There is <strong>no void/replacement process</strong> — the signature represents the prescriber's final clinical decision</li>
+<li>The signed Rx hash, timestamp, and prescriber details are stored permanently for audit</li>
+</ul>
+<h4>P items skip this phase</h4>
+<ul>
+<li>For P (Pharmacy) medicines, the pharmacist approved in Phase 6</li>
+<li>No formal Rx is generated — the approval decision, pharmacist ID, and timestamp serve as the record</li>
+<li>Flow goes directly from Phase 6 → Phase 8</li>
+</ul>
+</div>
+
+<div class="phase-nav">
+  <a href="phase-06-prescriber-review.html" class="">&larr; Phase 6: Prescriber / Pharmacist Review</a>
+  <a href="phase-08-post-approval-triggers.html" class="">Phase 8: Post-Approval Triggers &rarr;</a>
+</div>
+</main>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: "default", securityLevel: "loose", flowchart: { curve: "basis", padding: 20, nodeSpacing: 30, rankSpacing: 40, htmlLabels: true }, themeVariables: { fontSize: "13px" } });
+</script>
+</body>
+</html>

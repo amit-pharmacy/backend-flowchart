@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viva — Phase 3: Payment & Plan Selection</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<style>* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }
+header { background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+header h1 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+header .subtitle { font-size: 12px; color: #666; margin-top: 2px; }
+header .dev-badge { display: inline-block; background: #065f46; color: #34d399; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 4px; margin-left: 12px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; }
+.back-link { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
+.pdf-btn { background: #22253a; border: 1px solid #3a3d4a; color: #e0e0e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; }
+.pdf-btn:hover { background: #2a3a5a; border-color: #60a5fa; color: #fff; }
+main { max-width: 1200px; margin: 0 auto; padding: 30px 40px 60px; }
+h2 { font-size: 22px; font-weight: 700; color: #fff; }
+.phase-desc { font-size: 14px; color: #888; margin-bottom: 24px; line-height: 1.5; }
+.phase-desc strong { color: #b0b0b0; }
+.phase-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 12px; }
+.diagram-wrap { background: #fff; border-radius: 12px; padding: 30px; margin-bottom: 24px; overflow-x: auto; cursor: grab; position: relative; }
+.diagram-wrap:active { cursor: grabbing; }
+.diagram-wrap svg { max-width: 100%; height: auto; }
+.diagram-wrap .zoom-hint { position: absolute; top: 10px; right: 14px; font-size: 11px; color: #999; background: #f5f5f5; padding: 3px 10px; border-radius: 4px; }
+.annotation { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.annotation h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.annotation h4 { font-size: 13px; font-weight: 700; color: #e0e0e0; margin: 16px 0 6px; }
+.annotation p, .annotation li { font-size: 13px; color: #b0b0b0; line-height: 1.7; }
+.annotation ul { padding-left: 18px; }
+.annotation li { margin-bottom: 4px; }
+.annotation .highlight { color: #fbbf24; font-weight: 600; }
+.annotation .warn { color: #f87171; font-weight: 600; }
+.sub-phase-label { display: inline-block; background: #1e3a5f; color: #60a5fa; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 6px; margin: 24px 0 12px; letter-spacing: 0.5px; }
+.sub-phase-label.variant-b { background: #3b1f5e; color: #a78bfa; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+.ref-table th { background: #22253a; color: #60a5fa; text-align: left; padding: 10px 14px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+.ref-table td { padding: 10px 14px; border-bottom: 1px solid #2a2d3a; color: #b0b0b0; }
+.ref-table tr:hover td { background: #1e2a4a22; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge-green { background: #065f4620; color: #34d399; }
+.badge-red { background: #7f1d1d20; color: #f87171; }
+.badge-orange { background: #78350f20; color: #fbbf24; }
+.badge-blue { background: #1e3a5f40; color: #60a5fa; }
+.badge-purple { background: #3b1f5e40; color: #a78bfa; }
+.phase-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #2a2d3a; }
+.phase-nav a { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 6px; border: 1px solid #2a2d3a; background: #1a1d27; transition: all 0.15s; }
+.phase-nav a:hover { background: #22253a; border-color: #60a5fa; }
+.phase-nav .disabled { opacity: 0.3; pointer-events: none; }
+@media (max-width: 768px) { header { padding: 16px 20px; } main { padding: 20px 16px 60px; } .diagram-wrap { padding: 16px; border-radius: 8px; } .diagram-wrap svg { max-width: none; min-width: 400px; } .annotation { padding: 16px; border-radius: 8px; } }</style>
+</head>
+<body>
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#0f1117;position:fixed;top:0;left:0;z-index:9999;"><div style="text-align:center;max-width:360px;width:90%;"><div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:1px;">VIVA</div><div style="font-size:12px;color:#666;margin-bottom:32px;">Pharmacy Backend Flowchart</div><form id="authForm" onsubmit="return checkAuth(event)"><input id="authPass" type="password" placeholder="Enter password" autofocus style="width:100%;padding:14px 18px;border-radius:8px;border:1px solid #2a2d3a;background:#1a1d27;color:#e0e0e0;font-size:14px;outline:none;margin-bottom:12px;"><button type="submit" style="width:100%;padding:12px;border-radius:8px;border:none;background:#60a5fa;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Unlock</button></form><div id="authError" style="color:#f87171;font-size:13px;margin-top:12px;display:none;">Incorrect password</div></div></div>
+<script>
+async function sha256(str){const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+const HASH="7ab62e107f337d84178fb05138499c20ff2445cd35d4ca5f57295666e09b568d";
+if(sessionStorage.getItem("viva_auth")==="1"){document.getElementById("authGate").style.display="none";}
+async function checkAuth(e){e.preventDefault();const h=await sha256(document.getElementById("authPass").value);if(h===HASH){sessionStorage.setItem("viva_auth","1");document.getElementById("authGate").style.display="none";}else{document.getElementById("authError").style.display="block";document.getElementById("authPass").value="";}}
+</script>
+<header>
+  <div>
+    <h1>VIVA <span class="dev-badge">Developer</span></h1>
+    <div class="subtitle">Phase 3: Payment & Plan Selection</div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <a href="index.html" class="back-link">&larr; All Phases</a>
+    <button class="pdf-btn" onclick="window.print()">&#128196; Print / PDF</button>
+  </div>
+</header>
+<main>
+
+
+<p class="phase-desc">Consultation is saved, patient selects one-off or instalment plan, and payment is taken.</p>
+<div class="diagram-wrap">
+<pre class="mermaid">
+flowchart TD
+  A["Consultation submitted"]
+  A --> B["System saves full<br>consultation record +<br>reference number"]
+  B --> R["Run repeat submission<br>check → Phase 10"]:::supportNode
+  R --> L{"Logged in?"}
+  L -->|YES| PLAN
+  L -->|NO| M["Prompt: log in or<br>create account"]
+  M --> N["Patient enters:<br>name, DOB, email,<br>phone, delivery address"]
+  N --> PLAN
+
+  PLAN["<b>Select order type:</b>"]
+  PLAN --> TYPE{"One-off or<br>Instalment?"}
+  TYPE -->|"ONE-OFF (A)"| QTY_A["Select quantity<br>(single order)"]:::pathA
+  TYPE -->|"INSTALMENT (B)"| QTY_B["Select instalment plan<br>(e.g. 3, 6, 12 months)<br>Configurable per product<br>Hard limit: 12 months total"]:::pathB
+  QTY_A --> PAY["Patient pays"]
+  QTY_B --> PAY
+
+  PAY --> F{"Payment<br>successful?"}
+  F -->|NO| G["&#8635; Show payment error<br>— patient can retry"]:::orangeNode
+  G --> PAY
+  F -->|YES| H["Payment captured"]:::greenNode
+  H --> I["Confirmation shown:<br><i>'Payment received —<br>consultation being reviewed'</i>"]
+  I --> J["System records:<br>order type (one-off / instalment)<br>instalment count (if applicable)<br>instalment 1 of X"]
+  J --> K["→ PHASE 4: ID Check"]:::nextPhase
+
+  classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
+  classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
+  classDef supportNode fill:#f0f4ff,stroke:#93c5fd,color:#1e3a5f,stroke-dasharray: 5 5
+  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
+  classDef pathA fill:#eef6ff,stroke:#60a5fa,color:#1e3a5f,stroke-width:2px
+  classDef pathB fill:#f3eeff,stroke:#a78bfa,color:#3b1f5e,stroke-width:2px
+</pre>
+</div>
+<div class="annotation">
+<h3>Annotation</h3>
+<h4>One-off vs Instalment selection</h4>
+<ul>
+<li>Patient chooses <span class="badge badge-blue">Path A: One-off</span> (single order) or <span class="badge badge-purple">Path B: Instalment</span> (recurring monthly dispatch)</li>
+<li>Instalment plans: up to <strong>12 months</strong>. Duration options are <strong>configurable per product</strong> in the backend</li>
+<li><span class="warn">12-month hard limit</span> across ALL instalment plans. After 12 months of continuous treatment, a full fresh consultation is required</li>
+<li>Instalment availability is <strong>configurable per product</strong> — can be enabled/disabled by the pharmacy team</li>
+<li>Both POM and P items can support instalments</li>
+</ul>
+<h4>Payment model</h4>
+<ul>
+<li><span class="highlight">One-off:</span> Full payment upfront for the single order</li>
+<li><span class="highlight">Instalment:</span> First month's payment taken now. Subsequent months charged automatically</li>
+<li>If the order is later rejected (ID fail or clinical denial), <span class="warn">full refund</span> is issued</li>
+</ul>
+<h4>Excessive quantity controls</h4>
+<ul>
+<li>Clinical/pharmacy team can set maximum quantity per product</li>
+<li>Prescriber can flag orders with excessive quantities during review</li>
+<li>Prescriber / pharmacy team can <strong>override</strong> the patient's selected plan length (e.g. shorten duration based on clinical judgement)</li>
+</ul>
+<h4>Patient cancellation (pre-dispatch)</h4>
+<ul>
+<li>Patient has a <strong>"Request Cancellation"</strong> button in their account — available before dispatch</li>
+<li>Button sends a message to the pharmacy team via the messaging centre</li>
+<li>Team manually processes the cancellation and issues a refund</li>
+</ul>
+</div>
+
+<div class="phase-nav">
+  <a href="phase-02-consultation-form.html" class="">&larr; Phase 2: Consultation Form</a>
+  <a href="phase-04-id-verification.html" class="">Phase 4: ID Verification &rarr;</a>
+</div>
+</main>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: "default", securityLevel: "loose", flowchart: { curve: "basis", padding: 20, nodeSpacing: 30, rankSpacing: 40, htmlLabels: true }, themeVariables: { fontSize: "13px" } });
+</script>
+</body>
+</html>

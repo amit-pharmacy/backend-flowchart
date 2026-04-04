@@ -3,356 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vivamen — Developer Overview</title>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }
-
-  /* Header */
-  header { background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 20px 40px; }
-  header h1 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
-  header .subtitle { font-size: 12px; color: #666; margin-top: 2px; }
-  header .dev-badge { display: inline-block; background: #065f46; color: #34d399; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 4px; margin-left: 12px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; }
-
-  /* Main content */
-  main { max-width: 1200px; margin: 0 auto; padding: 30px 40px 60px; }
-
-  /* Section headers */
-  .section-title { font-size: 20px; font-weight: 700; color: #fff; margin: 40px 0 6px; }
-  .section-title:first-child { margin-top: 0; }
-  .section-desc { font-size: 13px; color: #888; margin-bottom: 20px; line-height: 1.5; }
-  .section-desc strong { color: #b0b0b0; }
-
-  /* Diagram container */
-  .diagram-wrap { background: #fff; border-radius: 12px; padding: 30px; margin-bottom: 24px; overflow-x: auto; cursor: grab; position: relative; -webkit-overflow-scrolling: touch; }
-  .diagram-wrap:active { cursor: grabbing; }
-  .diagram-wrap svg { max-width: 100%; height: auto; }
-  .diagram-wrap .zoom-hint { position: absolute; top: 10px; right: 14px; font-size: 11px; color: #999; background: #f5f5f5; padding: 3px 10px; border-radius: 4px; }
-
-  /* Annotation box */
-  .annotation { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
-  .annotation h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .annotation h4 { font-size: 13px; font-weight: 700; color: #e0e0e0; margin: 16px 0 6px; }
-  .annotation p, .annotation li { font-size: 13px; color: #b0b0b0; line-height: 1.7; }
-  .annotation ul { padding-left: 18px; }
-  .annotation li { margin-bottom: 4px; }
-  .annotation .highlight { color: #fbbf24; font-weight: 600; }
-  .annotation .warn { color: #f87171; font-weight: 600; }
-
-  /* Tables */
-  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; }
-  .ref-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
-  .ref-table th { background: #22253a; color: #60a5fa; text-align: left; padding: 10px 14px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
-  .ref-table td { padding: 10px 14px; border-bottom: 1px solid #2a2d3a; color: #b0b0b0; }
-  .ref-table tr:hover td { background: #1e2a4a22; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
-  .badge-green { background: #065f4620; color: #34d399; }
-  .badge-red { background: #7f1d1d20; color: #f87171; }
-  .badge-orange { background: #78350f20; color: #fbbf24; }
-  .badge-blue { background: #1e3a5f40; color: #60a5fa; }
-  .badge-purple { background: #3b1f5e40; color: #a78bfa; }
-
-  /* PDF Export button */
-  .pdf-btn { background: #22253a; border: 1px solid #3a3d4a; color: #e0e0e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; }
-  .pdf-btn:hover { background: #2a3a5a; border-color: #60a5fa; color: #fff; }
-  .pdf-btn.exporting { opacity: 0.5; pointer-events: none; }
-  .title-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-
-  /* Divider */
-  .divider { border: none; border-top: 1px solid #2a2d3a; margin: 36px 0; }
-
-  /* Mobile */
-  @media (max-width: 768px) {
-    header { padding: 16px 20px; }
-    main { padding: 20px 16px 60px; }
-    .section-title { font-size: 17px; }
-    .diagram-wrap { padding: 16px; border-radius: 8px; }
-    .diagram-wrap svg { max-width: none; min-width: 400px; }
-    .diagram-wrap .zoom-hint { display: none; }
-    .annotation { padding: 16px; border-radius: 8px; }
-  }
-  @media (pointer: coarse) {
-    .diagram-wrap { cursor: default; }
-    .diagram-wrap:active { cursor: default; }
-  }
-</style>
+<title>Viva — Developer Dashboard</title>
+<style>* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }
+header { background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 20px 40px; }
+header h1 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+header .dev-badge { display: inline-block; background: #065f46; color: #34d399; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 4px; margin-left: 12px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; }
+header .subtitle { font-size: 12px; color: #666; margin-top: 4px; }
+main { max-width: 900px; margin: 0 auto; padding: 30px 40px 60px; }
+.section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #555; font-weight: 700; margin: 24px 0 10px; padding-left: 4px; }
+.section-label:first-child { margin-top: 0; }
+.phase-card { display: block; text-decoration: none; background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 16px 20px; margin-bottom: 8px; transition: all 0.15s; }
+.phase-card:hover { background: #22253a; border-color: #60a5fa; }
+.phase-card .phase-num { display: inline-block; width: 28px; font-weight: 700; color: #60a5fa; font-size: 12px; }
+.phase-card .phase-title { color: #e0e0e0; font-size: 14px; font-weight: 600; }
+.full-link { display: inline-block; margin-top: 24px; color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 20px; border: 1px solid #2a2d3a; border-radius: 8px; background: #1a1d27; }
+.full-link:hover { background: #22253a; border-color: #60a5fa; }
+@media (max-width: 768px) { header { padding: 16px 20px; } main { padding: 20px 16px; } }</style>
 </head>
 <body>
-
-<header>
-  <h1>VIVAMEN <span class="dev-badge">Developer</span></h1>
-  <div class="subtitle">Pharmacy Backend — Full Flow Overview</div>
-</header>
-
-<main>
-
-<!-- ============ OVERVIEW FLOWCHART ============ -->
-<div class="title-row">
-  <h2 class="section-title" style="margin:0">Full Flow Overview</h2>
-  <button class="pdf-btn" onclick="exportPDF()">&#128196; Export PDF</button>
-</div>
-<p class="section-desc">Bird's-eye view of the entire backend — every phase shown. <strong>Green</strong> = happy path. <strong>Red</strong> = exit/rejection. <strong>Purple</strong> = instalment path. <strong>Dashed</strong> = external API. Side labels show which APIs are used at each stage.</p>
-
-<div class="diagram-wrap">
-<div class="zoom-hint">Scroll to pan</div>
-<pre class="mermaid">
-flowchart TD
-  START["&#9654; Patient on product page"]:::startNode
-  START --> P1["<b>Phase 1</b><br>Product Selection &amp;<br>Consultation Entry"]
-  P1 --> P2["<b>Phase 2</b><br>Consultation Form<br>(multi-step wizard)"]
-  P2 --> DENY{"Auto-deny?"}
-  DENY -->|YES| AD["&#10006; Denied<br>Advised to see GP"]:::redNode
-  DENY -->|NO| P3
-
-  P3["<b>Phase 3</b><br>Payment &amp; Plan Selection"]
-  P3 --> TYPE{"One-off or<br>Instalment?"}
-  TYPE -->|ONE-OFF| PAY_A["Pay in full"]:::pathA
-  TYPE -->|INSTALMENT| PAY_B["Pay 1st month"]:::pathB
-  PAY_A --> P4
-  PAY_B --> P4
-
-  P4["<b>Phase 4</b><br>ID Verification"]:::apiNode
-  P4 --> ID{"Pass?"}
-  ID -->|YES| P5
-  ID -->|FAIL| IDX["&#10006; Rejected + Refund"]:::redNode
-
-  P5["<b>Phase 5</b><br>Clinical Review Queue<br>&amp; Notification"]
-  P5 --> P6["<b>Phase 6</b><br>Prescriber / Pharmacist<br>Reviews Case"]
-  P6 --> DEC{"Decision?"}
-  DEC -->|APPROVE| P7_SPLIT{"Order type?"}
-  DEC -->|MORE INFO| P6
-  DEC -->|DENY| DENR["&#10006; Denied + Refund"]:::redNode
-
-  P7_SPLIT -->|ONE-OFF| P7A["<b>Phase 7A</b><br>Single Rx<br>(one order)"]:::pathA
-  P7_SPLIT -->|INSTALMENT| P7B["<b>Phase 7B</b><br>Single Rx covering<br>full plan period"]:::pathB
-  P7A --> SIGN
-  P7B --> SIGN
-  SIGN["Prescriber signs in<br>SignatureRx (FINAL)"]:::apiNode
-  SIGN --> P8["<b>Phase 8</b><br>Post-Approval Triggers<br><i>Fires immediately on decision:</i><br>GP Letter | Patient Msg |<br><b>Pharmacy Team Notified</b>"]:::greenNode
-
-  P8 --> P9["<b>Phase 9</b><br>PMR Sync &amp;<br>Print Slip"]:::supportNode
-  P9 --> P10["<b>Phase 10</b><br>Repeat Submission<br>Detection"]:::supportNode
-
-  P10 --> P11["<b>Phase 11</b><br>Dispatch"]:::apiNode
-  P11 --> P12["<b>Phase 12</b><br>Delivery &amp; Tracking"]
-  P12 -->|DELIVERED| DONE["&#9989; Complete"]:::greenEnd
-  P12 -->|FAILED| DELFAIL["Team action"]:::orangeNode
-
-  DONE --> NEXT{"Order type?"}
-  NEXT -->|ONE-OFF| REORDER{"Within grace<br>period?"}
-  REORDER -->|YES| REORD["Re-confirm → reorder"]:::pathA
-  REORD --> P11
-  REORDER -->|NO| EXPIRED["Fresh consultation"]:::orangeNode
-
-  NEXT -->|INSTALMENT| P13["<b>Phase 13</b><br>Instalment Renewal"]:::pathB
-  P13 -->|"Next month"| P11
-  P13 -->|"Plan ends &amp;<br>within 12mo"| RECON["Re-confirm →<br>new plan"]:::pathB
-  RECON --> P13
-  P13 -->|"12mo limit /<br>grace expired"| FRESH["Fresh consultation"]:::orangeNode
-
-  %% API annotations — side labels connected with dotted lines
-  API_STRIPE["&#9889; <b>Stripe</b><br>Payment + Refunds"]:::apiLabel
-  API_LEXIS["&#9889; <b>LexisNexis</b><br>ID Verification"]:::apiLabel
-  API_SRX["&#9889; <b>SignatureRx</b><br>E-Prescribing"]:::apiLabel
-  API_TITAN["&#9889; <b>TitanPMR</b><br>Patient Data Sync"]:::apiLabel
-  API_RM["&#9889; <b>Royal Mail</b><br>Shipping + Tracking"]:::apiLabel
-
-  API_STRIPE -.-> P3
-  API_LEXIS -.-> P4
-  API_SRX -.-> SIGN
-  API_TITAN -.-> P9
-  API_RM -.-> P11
-
-  classDef startNode fill:#1e3a5f,stroke:#60a5fa,color:#fff,stroke-width:2px
-  classDef greenNode fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
-  classDef greenEnd fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
-  classDef redNode fill:#7f1d1d,stroke:#f87171,color:#fff,stroke-width:2px
-  classDef orangeNode fill:#78350f,stroke:#fbbf24,color:#fff,stroke-width:2px
-  classDef apiNode fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,stroke-dasharray: 5 5
-  classDef supportNode fill:#f0f4ff,stroke:#93c5fd,color:#1e3a5f,stroke-width:1px,stroke-dasharray: 5 5
-  classDef pathA fill:#1e3a5f,stroke:#60a5fa,color:#fff,stroke-width:2px
-  classDef pathB fill:#3b1f5e,stroke:#a78bfa,color:#fff,stroke-width:2px
-  classDef apiLabel fill:#f5f3ff,stroke:#a78bfa,color:#5b21b6,stroke-width:1px,stroke-dasharray: 3 3,font-size:11px
-</pre>
-</div>
-
-<div class="annotation">
-<h3>Key Architecture Decisions</h3>
-<ul>
-<li><strong>Payment model:</strong> Full payment upfront. If rejected at any stage → automatic full refund.</li>
-<li><strong>One-off vs Instalment:</strong> Patient selects after consultation, before checkout. The flow splits at Phase 7: <span class="badge badge-blue">7A</span> = single Rx for one order. <span class="badge badge-purple">7B</span> = single Rx covering full instalment plan (max 3 months per plan, 12-month hard limit total).</li>
-<li><strong>Rx is final:</strong> Once the prescriber signs in SignatureRx, the prescription is locked. No void/replacement process.</li>
-<li><strong>Post-approval triggers (Phase 8):</strong> SignatureRx webhook fires THREE actions simultaneously: GP letter, patient notification, pharmacy queue entry. Pharmacy team is notified <em>immediately</em> — no manual handoff. GP notified <em>before</em> dispatch.</li>
-<li><strong>Instalment renewal:</strong> Pharmacy auto-dispatches monthly (no prescriber re-review). At plan end, patient re-confirms. After 12 months total → fresh consultation required.</li>
-<li><strong>Renewal overlap flag:</strong> If a patient triggers a renewal while a previous plan is still active, this is prominently flagged to both the prescriber (Phase 6) and pharmacy team (dispatch) so they can assess whether overlapping supply is appropriate.</li>
-<li><strong>Answer expiry (grace period):</strong> After a plan or order ends, the patient has a grace period of <strong>plan duration + 1 month</strong> to reorder. If that window passes, all consultation answers are cleared and they must start a fresh consultation. (e.g. 3-month plan = 4-month grace, 6-month plan = 7-month grace, one-off = 1 month grace). Configurable per product.</li>
-<li><strong>POM vs P:</strong> POM requires prescriber + SignatureRx Rx. P requires pharmacist approval (logged, no Rx). Both support instalments.</li>
-</ul>
-</div>
-
-<hr class="divider">
-
-<!-- ============ ERROR / EXCEPTION PATHS ============ -->
-<h2 class="section-title">Error / Exception Paths</h2>
-<p class="section-desc">All rejection and error scenarios with refund status.</p>
-
-<div class="table-wrap">
-<table class="ref-table">
-<tr><th>Scenario</th><th>What happens</th><th>Refund?</th><th>Terminal state</th></tr>
-<tr><td>Auto-denial from form logic</td><td>Patient told treatment not suitable, advised to see GP</td><td><span class="badge badge-green">No — before payment</span></td><td>Auto-Denied</td></tr>
-<tr><td>Payment fails at checkout</td><td>Patient shown error, can retry</td><td><span class="badge badge-blue">N/A — never captured</span></td><td>Awaiting Payment</td></tr>
-<tr><td>ID check fails</td><td>Upload requested → manual review → if still fails, rejected</td><td><span class="badge badge-red">Yes — via Stripe</span></td><td>Rejected → Refunded</td></tr>
-<tr><td>Clinician requests more info</td><td>Patient messaged, consultation paused</td><td><span class="badge badge-green">No — still active</span></td><td>Awaiting Response</td></tr>
-<tr><td>Clinician denies treatment</td><td>Reason logged, patient notified after refund confirmed</td><td><span class="badge badge-red">Yes — via Stripe</span></td><td>Rejected → Refunded</td></tr>
-<tr><td>Repeat submission detected</td><td>Flag shown to clinician during Phase 6 review</td><td><span class="badge badge-green">No — informational</span></td><td>Flagged for Review</td></tr>
-<tr><td>Consultation abandoned</td><td>Reminder email sent. Flagged at 7 days, abandonable at 30 days.</td><td><span class="badge badge-blue">N/A — before payment</span></td><td>Abandoned (Draft)</td></tr>
-<tr><td>Patient requests cancellation</td><td>Message to pharmacy team. Manual cancel + refund.</td><td><span class="badge badge-red">Yes — manual</span></td><td>Cancelled → Refunded</td></tr>
-<tr><td>Consultation timeout (30 days)</td><td>Team can reject/refund after 30 days.</td><td><span class="badge badge-red">Yes — manual</span></td><td>Abandoned → Refunded</td></tr>
-<tr><td>Delivery failed / returned</td><td>Delivery Failed screen. Team re-dispatches, contacts, or refunds.</td><td><span class="badge badge-orange">Depends on action</span></td><td>Delivery Failed</td></tr>
-<tr><td>API unavailable (any)</td><td>Order tagged "Pending (API Unavailable)". Auto-retry: 5min → 30min → 2hr → flag manual.</td><td><span class="badge badge-green">No — still active</span></td><td>Pending (API Down)</td></tr>
-<tr><td>Instalment payment fails (month 2+)</td><td>Pharmacy notified. Patient contacted. Dispatch paused.</td><td><span class="badge badge-orange">May cancel remaining</span></td><td>Instalment Paused</td></tr>
-<tr><td>12-month hard limit reached</td><td>Patient cannot renew. Must complete full new consultation.</td><td><span class="badge badge-green">No — not an error</span></td><td>Consultation Required</td></tr>
-</table>
-</div>
-
-<hr class="divider">
-
-<!-- ============ API INTEGRATIONS ============ -->
-<h2 class="section-title">API Integrations</h2>
-<p class="section-desc">All external system integrations with direction and timing.</p>
-
-<div class="table-wrap">
-<table class="ref-table">
-<tr><th>System</th><th>API</th><th>Direction</th><th>When</th></tr>
-<tr><td>LexisNexis IDU</td><td>Identity verification</td><td><span class="badge badge-blue">Website → LexisNexis</span></td><td>Phase 4 — after payment</td></tr>
-<tr><td>SignatureRx</td><td>Create Prescription</td><td><span class="badge badge-blue">Website → SignatureRx</span></td><td>Phase 7 — prescriber approves POM</td></tr>
-<tr><td>SignatureRx</td><td>Signed Rx webhook</td><td><span class="badge badge-orange">SignatureRx → Website</span></td><td>Phase 7 → triggers Phase 8 (GP letter + patient msg + pharmacy queue)</td></tr>
-<tr><td>Royal Mail</td><td>Create Shipment</td><td><span class="badge badge-blue">Website → Royal Mail</span></td><td>Phase 11 — after order packed</td></tr>
-<tr><td>Royal Mail</td><td>Tracking webhook</td><td><span class="badge badge-orange">Royal Mail → Website</span></td><td>Phase 12 — delivery updates</td></tr>
-<tr><td>TitanPMR</td><td>Patient data push</td><td><span class="badge badge-blue">Website → TitanPMR</span></td><td>Phase 9 — after order confirmed</td></tr>
-<tr><td>Stripe</td><td>Full capture / first instalment</td><td><span class="badge badge-blue">Website → Stripe</span></td><td>Phase 3 — after plan selection</td></tr>
-<tr><td>Stripe</td><td>Recurring instalment charge</td><td><span class="badge badge-purple">Stripe → auto-charge</span></td><td>Phase 13 — monthly for instalment plans</td></tr>
-<tr><td>Stripe</td><td>Refund confirmation webhook</td><td><span class="badge badge-orange">Stripe → Website</span></td><td>After team issues refund</td></tr>
-</table>
-</div>
-
-<hr class="divider">
-
-<!-- ============ OPTIONAL EXTRAS ============ -->
-<h2 class="section-title">Optional Extras</h2>
-<p class="section-desc">Features we ideally want but can be deferred. These are <strong>not blockers</strong> — the core flow works without them.</p>
-
-<div class="table-wrap">
-<table class="ref-table">
-<tr><th>Priority</th><th>Feature</th><th>What it does</th><th>Where</th><th>Fallback</th></tr>
-<tr><td><span class="badge badge-orange">High</span></td><td><strong>Stock management</strong></td><td>Track stock levels, block dispatch if out of stock</td><td>Phase 11</td><td>Manual tracking</td></tr>
-<tr><td><span class="badge badge-orange">High</span></td><td><strong>TitanPMR API</strong></td><td>Auto-push patient data to PMR</td><td>Phase 9</td><td>Manual export</td></tr>
-<tr><td><span class="badge badge-blue">Medium</span></td><td><strong>Royal Mail tracking webhook</strong></td><td>Auto-update delivery status</td><td>Phase 12</td><td>Manual status update</td></tr>
-<tr><td><span class="badge badge-blue">Medium</span></td><td><strong>Notification batching</strong></td><td>Digest emails for prescribers</td><td>Phase 5</td><td>Immediate per case</td></tr>
-<tr><td><span class="badge badge-blue">Medium</span></td><td><strong>Answer-diff detection</strong></td><td>Compare repeat submission answers</td><td>Phase 10</td><td>Manual comparison</td></tr>
-<tr><td><span class="badge badge-green">Low</span></td><td><strong>Low-stock alerts</strong></td><td>Email when stock is low</td><td>Phase 11</td><td>Depends on stock mgmt</td></tr>
-</table>
-</div>
-
-</main>
-
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#0f1117;position:fixed;top:0;left:0;z-index:9999;"><div style="text-align:center;max-width:360px;width:90%;"><div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:1px;">VIVA</div><div style="font-size:12px;color:#666;margin-bottom:32px;">Pharmacy Backend Flowchart</div><form id="authForm" onsubmit="return checkAuth(event)"><input id="authPass" type="password" placeholder="Enter password" autofocus style="width:100%;padding:14px 18px;border-radius:8px;border:1px solid #2a2d3a;background:#1a1d27;color:#e0e0e0;font-size:14px;outline:none;margin-bottom:12px;"><button type="submit" style="width:100%;padding:12px;border-radius:8px;border:none;background:#60a5fa;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Unlock</button></form><div id="authError" style="color:#f87171;font-size:13px;margin-top:12px;display:none;">Incorrect password</div></div></div>
 <script>
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: 'default',
-    securityLevel: 'loose',
-    flowchart: { curve: 'basis', padding: 20, nodeSpacing: 30, rankSpacing: 40, htmlLabels: true },
-    themeVariables: { fontSize: '13px' }
-  });
-
-  function exportPDF() {
-    const btn = event.target;
-    const origText = btn.textContent;
-    btn.textContent = 'Preparing...';
-    btn.classList.add('exporting');
-
-    // Collect diagram SVG
-    const diagramSVGs = [];
-    document.querySelectorAll('.diagram-wrap svg').forEach(svg => {
-      const s = svg.cloneNode(true);
-      if (!s.getAttribute('viewBox')) {
-        const w = parseFloat(s.getAttribute('width')) || svg.getBoundingClientRect().width;
-        const h = parseFloat(s.getAttribute('height')) || svg.getBoundingClientRect().height;
-        s.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
-      }
-      s.removeAttribute('width');
-      s.removeAttribute('height');
-      s.removeAttribute('style');
-      diagramSVGs.push(s.outerHTML);
-    });
-
-    // Collect all non-diagram content (annotations, tables, dividers)
-    let textContent = '';
-    const main = document.querySelector('main');
-    for (const child of main.children) {
-      if (child.classList.contains('diagram-wrap') || child.classList.contains('title-row') || (child.classList.contains('section-desc') && textContent === '')) continue;
-      if (child.classList.contains('diagram-wrap')) continue;
-      textContent += child.outerHTML;
-    }
-
-    const printWindow = window.open('', '_blank');
-    let diagramPages = '';
-    diagramSVGs.forEach((svgHtml, i) => {
-      diagramPages += '<div class="diagram-page"><div class="diagram-wrap">' + svgHtml + '</div></div>';
-    });
-
-    printWindow.document.write('<!DOCTYPE html>\n<html><head>\n<meta charset="UTF-8">\n<title>Vivamen Developer Overview — PDF</title>\n<style>\n' +
-      '@page { size: A4 landscape; margin: 10mm; }\n' +
-      '* { margin: 0; padding: 0; box-sizing: border-box; }\n' +
-      'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }\n' +
-      'h2 { font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px; }\n' +
-      '.diagram-page { width: 277mm; height: 190mm; page-break-after: always; display: flex; flex-direction: column; padding: 5px; overflow: hidden; }\n' +
-      '.diagram-page:last-of-type { page-break-after: auto; }\n' +
-      '.diagram-wrap { background: #fff; border-radius: 8px; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }\n' +
-      '.diagram-wrap svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }\n' +
-      '.text-pages { padding: 15px 20px; }\n' +
-      '.text-pages h2 { margin-bottom: 12px; }\n' +
-      '.section-title { font-size: 15px; font-weight: 700; color: #fff; margin: 20px 0 6px; }\n' +
-      '.section-desc { font-size: 11px; color: #888; margin-bottom: 12px; line-height: 1.5; }\n' +
-      '.section-desc strong { color: #b0b0b0; }\n' +
-      '.annotation { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 14px; margin-bottom: 14px; font-size: 11px; line-height: 1.6; page-break-inside: avoid; }\n' +
-      '.annotation h3 { color: #60a5fa; font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }\n' +
-      '.annotation h4 { color: #fff; font-size: 11px; margin: 10px 0 4px; }\n' +
-      '.annotation li { margin-bottom: 3px; }\n' +
-      '.annotation strong { color: #fff; }\n' +
-      '.warn { color: #fbbf24; font-weight: 700; }\n' +
-      '.highlight { color: #60a5fa; font-weight: 600; }\n' +
-      '.badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; }\n' +
-      '.badge-green { background: #065f4620; color: #34d399; }\n' +
-      '.badge-red { background: #7f1d1d20; color: #f87171; }\n' +
-      '.badge-orange { background: #78350f20; color: #fbbf24; }\n' +
-      '.badge-blue { background: #1e3a5f; color: #60a5fa; }\n' +
-      '.badge-purple { background: #3b1f5e; color: #a78bfa; }\n' +
-      'table { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 8px; }\n' +
-      'th { background: #22253a; color: #60a5fa; padding: 5px 7px; text-align: left; border: 1px solid #2a2d3a; }\n' +
-      'td { padding: 5px 7px; border: 1px solid #2a2d3a; }\n' +
-      '.table-wrap { overflow: visible; margin-bottom: 14px; }\n' +
-      '.ref-table { width: 100%; }\n' +
-      '.divider { border: none; border-top: 1px solid #2a2d3a; margin: 16px 0; }\n' +
-      '.title-row { display: none; }\n' +
-      '.print-hint { text-align: center; padding: 10px; color: #888; font-size: 12px; border-bottom: 1px solid #2a2d3a; margin-bottom: 10px; }\n' +
-      '.print-hint strong { color: #60a5fa; }\n' +
-      '@media print { .print-hint { display: none; } }\n' +
-      '</style>\n</head><body>\n' +
-      '<div class="print-hint">Press <strong>Ctrl+P</strong> (or Cmd+P) → Save as PDF. Layout: <strong>A4 Landscape</strong>, Background graphics: <strong>ON</strong>. Flowchart on page 1, reference tables follow.</div>\n' +
-      diagramPages +
-      '<div class="text-pages"><h2>Vivamen Developer Overview — Reference</h2>' + textContent + '</div>\n' +
-      '</body></html>');
-    printWindow.document.close();
-
-    setTimeout(function() {
-      printWindow.print();
-    }, 1000);
-
-    btn.textContent = origText;
-    btn.classList.remove('exporting');
-  }
+async function sha256(str){const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+const HASH="7ab62e107f337d84178fb05138499c20ff2445cd35d4ca5f57295666e09b568d";
+if(sessionStorage.getItem("viva_auth")==="1"){document.getElementById("authGate").style.display="none";}
+async function checkAuth(e){e.preventDefault();const h=await sha256(document.getElementById("authPass").value);if(h===HASH){sessionStorage.setItem("viva_auth","1");document.getElementById("authGate").style.display="none";}else{document.getElementById("authError").style.display="block";document.getElementById("authPass").value="";}}
 </script>
+<header>
+  <h1>VIVA <span class="dev-badge">Developer</span></h1>
+  <div class="subtitle">Pharmacy Backend — All Phases</div>
+</header>
+<main>
+  <div class="section-label">Patient Journey</div>
+  <a href="overview.html" class="phase-card"><span class="phase-num">—</span><span class="phase-title">Full Flow Overview</span></a>
+  <a href="phase-01-product-selection.html" class="phase-card"><span class="phase-num">1</span><span class="phase-title">Phase 1: Product Selection</span></a>
+  <a href="phase-02-consultation-form.html" class="phase-card"><span class="phase-num">2</span><span class="phase-title">Phase 2: Consultation Form</span></a>
+  <a href="phase-03-payment.html" class="phase-card"><span class="phase-num">3</span><span class="phase-title">Phase 3: Payment & Plan Selection</span></a>
+  <div class="section-label">Verification &amp; Review</div>
+  <a href="phase-04-id-verification.html" class="phase-card"><span class="phase-num">4</span><span class="phase-title">Phase 4: ID Verification</span></a>
+  <a href="phase-05-clinical-review-queue.html" class="phase-card"><span class="phase-num">5</span><span class="phase-title">Phase 5: Clinical Review Queue</span></a>
+  <a href="phase-06-prescriber-review.html" class="phase-card"><span class="phase-num">6</span><span class="phase-title">Phase 6: Prescriber / Pharmacist Review</span></a>
+  <div class="section-label">Prescription &amp; Approval</div>
+  <a href="phase-07-rx-esigning.html" class="phase-card"><span class="phase-num">7</span><span class="phase-title">Phase 7: Rx Generation & E-Signing (7A / 7B)</span></a>
+  <a href="phase-08-post-approval-triggers.html" class="phase-card"><span class="phase-num">8</span><span class="phase-title">Phase 8: Post-Approval Triggers</span></a>
+  <div class="section-label">Fulfilment</div>
+  <a href="phase-09-pmr-print-slip.html" class="phase-card"><span class="phase-num">9</span><span class="phase-title">Phase 9: PMR Integration & Print Slip</span></a>
+  <a href="phase-10-repeat-detection.html" class="phase-card"><span class="phase-num">10</span><span class="phase-title">Phase 10: Repeat Submission Detection</span></a>
+  <a href="phase-11-dispatch.html" class="phase-card"><span class="phase-num">11</span><span class="phase-title">Phase 11: Order Processing & Dispatch</span></a>
+  <div class="section-label">Lifecycle</div>
+  <a href="phase-12-post-dispatch.html" class="phase-card"><span class="phase-num">12</span><span class="phase-title">Phase 12: Post-Dispatch & Delivery</span></a>
+  <a href="phase-13-instalment-renewal.html" class="phase-card"><span class="phase-num">13</span><span class="phase-title">Phase 13: Instalment Renewal</span></a>
+  <div class="section-label">Reference</div>
+  <a href="error-paths.html" class="phase-card"><span class="phase-num">!</span><span class="phase-title">Error / Exception Paths</span></a>
+  <a href="api-integrations.html" class="phase-card"><span class="phase-num">API</span><span class="phase-title">API Integrations</span></a>
+  <a href="optional-extras.html" class="phase-card"><span class="phase-num">+</span><span class="phase-title">Optional Extras</span></a>
+  <a href="../" class="full-link">&larr; Full Interactive Flowchart</a>
+</main>
 </body>
 </html>

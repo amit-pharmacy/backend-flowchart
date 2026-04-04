@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viva — Full Flow Overview</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<style>* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }
+header { background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+header h1 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+header .subtitle { font-size: 12px; color: #666; margin-top: 2px; }
+header .dev-badge { display: inline-block; background: #065f46; color: #34d399; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 4px; margin-left: 12px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; }
+.back-link { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
+.pdf-btn { background: #22253a; border: 1px solid #3a3d4a; color: #e0e0e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; }
+.pdf-btn:hover { background: #2a3a5a; border-color: #60a5fa; color: #fff; }
+main { max-width: 1200px; margin: 0 auto; padding: 30px 40px 60px; }
+h2 { font-size: 22px; font-weight: 700; color: #fff; }
+.phase-desc { font-size: 14px; color: #888; margin-bottom: 24px; line-height: 1.5; }
+.phase-desc strong { color: #b0b0b0; }
+.phase-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 12px; }
+.diagram-wrap { background: #fff; border-radius: 12px; padding: 30px; margin-bottom: 24px; overflow-x: auto; cursor: grab; position: relative; }
+.diagram-wrap:active { cursor: grabbing; }
+.diagram-wrap svg { max-width: 100%; height: auto; }
+.diagram-wrap .zoom-hint { position: absolute; top: 10px; right: 14px; font-size: 11px; color: #999; background: #f5f5f5; padding: 3px 10px; border-radius: 4px; }
+.annotation { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.annotation h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.annotation h4 { font-size: 13px; font-weight: 700; color: #e0e0e0; margin: 16px 0 6px; }
+.annotation p, .annotation li { font-size: 13px; color: #b0b0b0; line-height: 1.7; }
+.annotation ul { padding-left: 18px; }
+.annotation li { margin-bottom: 4px; }
+.annotation .highlight { color: #fbbf24; font-weight: 600; }
+.annotation .warn { color: #f87171; font-weight: 600; }
+.sub-phase-label { display: inline-block; background: #1e3a5f; color: #60a5fa; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 6px; margin: 24px 0 12px; letter-spacing: 0.5px; }
+.sub-phase-label.variant-b { background: #3b1f5e; color: #a78bfa; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+.ref-table th { background: #22253a; color: #60a5fa; text-align: left; padding: 10px 14px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+.ref-table td { padding: 10px 14px; border-bottom: 1px solid #2a2d3a; color: #b0b0b0; }
+.ref-table tr:hover td { background: #1e2a4a22; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge-green { background: #065f4620; color: #34d399; }
+.badge-red { background: #7f1d1d20; color: #f87171; }
+.badge-orange { background: #78350f20; color: #fbbf24; }
+.badge-blue { background: #1e3a5f40; color: #60a5fa; }
+.badge-purple { background: #3b1f5e40; color: #a78bfa; }
+.phase-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #2a2d3a; }
+.phase-nav a { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 6px; border: 1px solid #2a2d3a; background: #1a1d27; transition: all 0.15s; }
+.phase-nav a:hover { background: #22253a; border-color: #60a5fa; }
+.phase-nav .disabled { opacity: 0.3; pointer-events: none; }
+@media (max-width: 768px) { header { padding: 16px 20px; } main { padding: 20px 16px 60px; } .diagram-wrap { padding: 16px; border-radius: 8px; } .diagram-wrap svg { max-width: none; min-width: 400px; } .annotation { padding: 16px; border-radius: 8px; } }</style>
+</head>
+<body>
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#0f1117;position:fixed;top:0;left:0;z-index:9999;"><div style="text-align:center;max-width:360px;width:90%;"><div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:1px;">VIVA</div><div style="font-size:12px;color:#666;margin-bottom:32px;">Pharmacy Backend Flowchart</div><form id="authForm" onsubmit="return checkAuth(event)"><input id="authPass" type="password" placeholder="Enter password" autofocus style="width:100%;padding:14px 18px;border-radius:8px;border:1px solid #2a2d3a;background:#1a1d27;color:#e0e0e0;font-size:14px;outline:none;margin-bottom:12px;"><button type="submit" style="width:100%;padding:12px;border-radius:8px;border:none;background:#60a5fa;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Unlock</button></form><div id="authError" style="color:#f87171;font-size:13px;margin-top:12px;display:none;">Incorrect password</div></div></div>
+<script>
+async function sha256(str){const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+const HASH="7ab62e107f337d84178fb05138499c20ff2445cd35d4ca5f57295666e09b568d";
+if(sessionStorage.getItem("viva_auth")==="1"){document.getElementById("authGate").style.display="none";}
+async function checkAuth(e){e.preventDefault();const h=await sha256(document.getElementById("authPass").value);if(h===HASH){sessionStorage.setItem("viva_auth","1");document.getElementById("authGate").style.display="none";}else{document.getElementById("authError").style.display="block";document.getElementById("authPass").value="";}}
+</script>
+<header>
+  <div>
+    <h1>VIVA <span class="dev-badge">Developer</span></h1>
+    <div class="subtitle">Full Flow Overview</div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <a href="index.html" class="back-link">&larr; All Phases</a>
+    <button class="pdf-btn" onclick="window.print()">&#128196; Print / PDF</button>
+  </div>
+</header>
+<main>
+
+
+<p class="phase-desc">Bird's-eye view of the entire backend — every phase shown. <strong>Green</strong> = happy path. <strong>Red</strong> = exit/rejection. <strong>Purple</strong> = instalment path. <strong>Dashed</strong> = external API. Click any phase in the sidebar for granular detail.</p>
+<div class="diagram-wrap">
+<div class="zoom-hint">Scroll to zoom</div>
+<pre class="mermaid">
+flowchart TD
+  START["&#9654; Patient on product page"]:::startNode
+  START --> P1["<b>Phase 1</b><br>Product Selection &amp;<br>Consultation Entry"]
+  P1 --> P2["<b>Phase 2</b><br>Consultation Form<br>(multi-step wizard)"]
+  P2 --> DENY{"Auto-deny?"}
+  DENY -->|YES| AD["&#10006; Denied<br>Advised to see GP"]:::redNode
+  DENY -->|NO| P3
+
+  P3["<b>Phase 3</b><br>Payment &amp; Plan Selection"]
+  P3 --> TYPE{"One-off or<br>Instalment?"}
+  TYPE -->|ONE-OFF| PAY_A["Pay in full"]:::pathA
+  TYPE -->|INSTALMENT| PAY_B["Pay 1st month"]:::pathB
+  PAY_A --> P4
+  PAY_B --> P4
+
+  P4["<b>Phase 4</b><br>ID Verification"]:::apiNode
+  P4 --> ID{"Pass?"}
+  ID -->|YES| P5
+  ID -->|FAIL| IDX["&#10006; Rejected + Refund"]:::redNode
+
+  P5["<b>Phase 5</b><br>Review Queue<br>&amp; Notification"]
+  P5 --> CLASS{"Product<br>classification?"}
+
+  CLASS -->|POM| P6_POM["<b>Phase 6</b><br>Prescriber Reviews"]:::pomNode
+  CLASS -->|"P item"| P6_P["<b>Phase 6</b><br>Pharmacist Reviews"]:::pItemNode
+  CLASS -->|"GSL / Test Kit"| P6_GSL["<b>Phase 6</b><br>Pharmacy Team<br>Processes"]:::gslNode
+
+  P6_POM --> DEC{"Decision?"}
+  DEC -->|APPROVE| P7_SPLIT{"Order type?"}
+  DEC -->|MORE INFO| P6_POM
+  DEC -->|DENY| DENR["&#10006; Denied + Refund"]:::redNode
+
+  P6_P --> DEC_P{"Decision?"}
+  DEC_P -->|APPROVE| P8
+  DEC_P -->|MORE INFO| P6_P
+  DEC_P -->|DENY| DENR
+
+  P6_GSL --> P8
+
+  P7_SPLIT -->|ONE-OFF| P7A["<b>Phase 7A</b><br>Single Rx<br>(one order)"]:::pathA
+  P7_SPLIT -->|INSTALMENT| P7B["<b>Phase 7B</b><br>Single Rx covering<br>full plan period"]:::pathB
+  P7A --> SIGN
+  P7B --> SIGN
+  SIGN["Prescriber signs in<br>SignatureRx (FINAL)"]:::apiNode
+  SIGN --> P8["<b>Phase 8</b><br>Post-Approval Triggers<br><i>Fires immediately on decision:</i><br>GP Letter | Patient Msg |<br><b>Pharmacy Team Notified</b>"]:::greenNode
+
+  P8 --> P9["<b>Phase 9</b><br>PMR Sync &amp;<br>Print Slip"]:::supportNode
+  P9 --> P10["<b>Phase 10</b><br>Repeat Submission<br>Detection"]:::supportNode
+
+  P10 --> P11["<b>Phase 11</b><br>Dispatch"]:::apiNode
+  P11 --> P12["<b>Phase 12</b><br>Delivery &amp; Tracking"]
+  P12 -->|DELIVERED| DONE["&#9989; Complete"]:::greenEnd
+  P12 -->|FAILED| DELFAIL["Team action"]:::orangeNode
+
+  DONE --> NEXT{"Order type?"}
+  NEXT -->|ONE-OFF| REORDER{"Within grace<br>period?"}
+  REORDER -->|YES| REORD["Re-confirm → reorder"]:::pathA
+  REORD --> P11
+  REORDER -->|NO| EXPIRED["Fresh consultation"]:::orangeNode
+
+  NEXT -->|INSTALMENT| P13["<b>Phase 13</b><br>Instalment Renewal"]:::pathB
+  P13 -->|"Next month"| P11
+  P13 -->|"Plan ends &amp;<br>within 12mo"| RECON["Re-confirm →<br>new plan"]:::pathB
+  RECON --> P13
+  P13 -->|"12mo limit /<br>grace expired"| FRESH["Fresh consultation"]:::orangeNode
+
+  %% API annotations — side labels connected with dotted lines
+  API_STRIPE["&#9889; <b>Stripe</b><br>Payment + Refunds"]:::apiLabel
+  API_LEXIS["&#9889; <b>LexisNexis</b><br>ID Verification"]:::apiLabel
+  API_SRX["&#9889; <b>SignatureRx</b><br>E-Prescribing"]:::apiLabel
+  API_TITAN["&#9889; <b>TitanPMR</b><br>Patient Data Sync"]:::apiLabel
+  API_RM["&#9889; <b>Royal Mail</b><br>Shipping + Tracking"]:::apiLabel
+
+  API_STRIPE -.-> P3
+  API_LEXIS -.-> P4
+  API_SRX -.-> SIGN
+  API_TITAN -.-> P9
+  API_RM -.-> P11
+
+  classDef startNode fill:#1e3a5f,stroke:#60a5fa,color:#fff,stroke-width:2px
+  classDef greenNode fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
+  classDef greenEnd fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
+  classDef redNode fill:#7f1d1d,stroke:#f87171,color:#fff,stroke-width:2px
+  classDef orangeNode fill:#78350f,stroke:#fbbf24,color:#fff,stroke-width:2px
+  classDef apiNode fill:#eef2ff,stroke:#818cf8,color:#3730a3,stroke-width:2px,stroke-dasharray: 5 5
+  classDef supportNode fill:#f0f4ff,stroke:#93c5fd,color:#1e3a5f,stroke-width:1px,stroke-dasharray: 5 5
+  classDef pathA fill:#1e3a5f,stroke:#60a5fa,color:#fff,stroke-width:2px
+  classDef pathB fill:#3b1f5e,stroke:#a78bfa,color:#fff,stroke-width:2px
+  classDef pomNode fill:#7f1d1d,stroke:#f87171,color:#fff,stroke-width:2px
+  classDef pItemNode fill:#1e3a5f,stroke:#818cf8,color:#fff,stroke-width:2px
+  classDef gslNode fill:#065f46,stroke:#34d399,color:#fff,stroke-width:2px
+  classDef apiLabel fill:#f5f3ff,stroke:#a78bfa,color:#5b21b6,stroke-width:1px,stroke-dasharray: 3 3,font-size:11px
+</pre>
+</div>
+<div class="annotation">
+<h3>Key Architecture Decisions</h3>
+<ul>
+<li><strong>Payment model:</strong> Full payment upfront. If rejected at any stage → automatic full refund.</li>
+<li><strong>One-off vs Instalment:</strong> Patient selects after consultation, before checkout. The flow splits at Phase 7: <span class="badge badge-blue">7A</span> = single Rx for one order. <span class="badge badge-purple">7B</span> = single Rx covering full instalment plan (up to 12 months, configurable per product). Prescriber can override the patient's selected plan length.</li>
+<li><strong>Rx is final:</strong> Once the prescriber signs in SignatureRx, the prescription is locked. No void/replacement process.</li>
+<li><strong>Post-approval triggers (Phase 8):</strong> SignatureRx webhook fires THREE actions simultaneously: GP letter, patient notification, pharmacy queue entry. GP notified <em>before</em> dispatch.</li>
+<li><strong>Instalment renewal:</strong> Pharmacy auto-dispatches monthly (no prescriber re-review). At plan end, patient re-confirms. After 12 months total → fresh consultation required.</li>
+<li><strong>Renewal overlap flag:</strong> If a patient triggers a renewal while a previous plan is still active, this is prominently flagged to both the prescriber (Phase 6) and pharmacy team (dispatch) so they can assess whether overlapping supply is appropriate.</li>
+<li><strong>Answer expiry (grace period):</strong> After a plan or order ends, the patient has a grace period of <strong>plan duration + 1 month</strong> to reorder. If that window passes, all consultation answers are cleared and they must start a fresh consultation. (e.g. 3-month plan = 4-month grace, 6-month plan = 7-month grace, one-off = 1 month grace). Configurable per product.</li>
+<li><strong>Three product classifications:</strong> <span class="badge badge-red">POM</span> → prescriber reviews + Rx + e-signing in SignatureRx. <span class="badge badge-blue">P (Pharmacy)</span> → pharmacist reviews + approves (logged &amp; timestamped, no e-signing). <span class="badge badge-green">GSL / Test Kit</span> → pharmacy team processes directly (no clinical review needed). All three paths support instalments.</li>
+</ul>
+</div>
+
+<div class="phase-nav">
+  <a href="#" class=" disabled">&larr; First Phase</a>
+  <a href="phase-01-product-selection.html" class="">Phase 1: Product Selection &rarr;</a>
+</div>
+</main>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: "default", securityLevel: "loose", flowchart: { curve: "basis", padding: 20, nodeSpacing: 30, rankSpacing: 40, htmlLabels: true }, themeVariables: { fontSize: "13px" } });
+</script>
+</body>
+</html>

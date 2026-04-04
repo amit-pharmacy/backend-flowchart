@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viva — Phase 13: Instalment Renewal</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<style>* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }
+header { background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+header h1 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+header .subtitle { font-size: 12px; color: #666; margin-top: 2px; }
+header .dev-badge { display: inline-block; background: #065f46; color: #34d399; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 4px; margin-left: 12px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; }
+.back-link { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
+.pdf-btn { background: #22253a; border: 1px solid #3a3d4a; color: #e0e0e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; }
+.pdf-btn:hover { background: #2a3a5a; border-color: #60a5fa; color: #fff; }
+main { max-width: 1200px; margin: 0 auto; padding: 30px 40px 60px; }
+h2 { font-size: 22px; font-weight: 700; color: #fff; }
+.phase-desc { font-size: 14px; color: #888; margin-bottom: 24px; line-height: 1.5; }
+.phase-desc strong { color: #b0b0b0; }
+.phase-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 12px; }
+.diagram-wrap { background: #fff; border-radius: 12px; padding: 30px; margin-bottom: 24px; overflow-x: auto; cursor: grab; position: relative; }
+.diagram-wrap:active { cursor: grabbing; }
+.diagram-wrap svg { max-width: 100%; height: auto; }
+.diagram-wrap .zoom-hint { position: absolute; top: 10px; right: 14px; font-size: 11px; color: #999; background: #f5f5f5; padding: 3px 10px; border-radius: 4px; }
+.annotation { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.annotation h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.annotation h4 { font-size: 13px; font-weight: 700; color: #e0e0e0; margin: 16px 0 6px; }
+.annotation p, .annotation li { font-size: 13px; color: #b0b0b0; line-height: 1.7; }
+.annotation ul { padding-left: 18px; }
+.annotation li { margin-bottom: 4px; }
+.annotation .highlight { color: #fbbf24; font-weight: 600; }
+.annotation .warn { color: #f87171; font-weight: 600; }
+.sub-phase-label { display: inline-block; background: #1e3a5f; color: #60a5fa; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 6px; margin: 24px 0 12px; letter-spacing: 0.5px; }
+.sub-phase-label.variant-b { background: #3b1f5e; color: #a78bfa; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+.ref-table th { background: #22253a; color: #60a5fa; text-align: left; padding: 10px 14px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+.ref-table td { padding: 10px 14px; border-bottom: 1px solid #2a2d3a; color: #b0b0b0; }
+.ref-table tr:hover td { background: #1e2a4a22; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge-green { background: #065f4620; color: #34d399; }
+.badge-red { background: #7f1d1d20; color: #f87171; }
+.badge-orange { background: #78350f20; color: #fbbf24; }
+.badge-blue { background: #1e3a5f40; color: #60a5fa; }
+.badge-purple { background: #3b1f5e40; color: #a78bfa; }
+.phase-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #2a2d3a; }
+.phase-nav a { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 6px; border: 1px solid #2a2d3a; background: #1a1d27; transition: all 0.15s; }
+.phase-nav a:hover { background: #22253a; border-color: #60a5fa; }
+.phase-nav .disabled { opacity: 0.3; pointer-events: none; }
+@media (max-width: 768px) { header { padding: 16px 20px; } main { padding: 20px 16px 60px; } .diagram-wrap { padding: 16px; border-radius: 8px; } .diagram-wrap svg { max-width: none; min-width: 400px; } .annotation { padding: 16px; border-radius: 8px; } }</style>
+</head>
+<body>
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#0f1117;position:fixed;top:0;left:0;z-index:9999;"><div style="text-align:center;max-width:360px;width:90%;"><div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:1px;">VIVA</div><div style="font-size:12px;color:#666;margin-bottom:32px;">Pharmacy Backend Flowchart</div><form id="authForm" onsubmit="return checkAuth(event)"><input id="authPass" type="password" placeholder="Enter password" autofocus style="width:100%;padding:14px 18px;border-radius:8px;border:1px solid #2a2d3a;background:#1a1d27;color:#e0e0e0;font-size:14px;outline:none;margin-bottom:12px;"><button type="submit" style="width:100%;padding:12px;border-radius:8px;border:none;background:#60a5fa;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Unlock</button></form><div id="authError" style="color:#f87171;font-size:13px;margin-top:12px;display:none;">Incorrect password</div></div></div>
+<script>
+async function sha256(str){const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+const HASH="7ab62e107f337d84178fb05138499c20ff2445cd35d4ca5f57295666e09b568d";
+if(sessionStorage.getItem("viva_auth")==="1"){document.getElementById("authGate").style.display="none";}
+async function checkAuth(e){e.preventDefault();const h=await sha256(document.getElementById("authPass").value);if(h===HASH){sessionStorage.setItem("viva_auth","1");document.getElementById("authGate").style.display="none";}else{document.getElementById("authError").style.display="block";document.getElementById("authPass").value="";}}
+</script>
+<header>
+  <div>
+    <h1>VIVA <span class="dev-badge">Developer</span></h1>
+    <div class="subtitle">Phase 13: Instalment Renewal</div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <a href="index.html" class="back-link">&larr; All Phases</a>
+    <button class="pdf-btn" onclick="window.print()">&#128196; Print / PDF</button>
+  </div>
+</header>
+<main>
+
+
+<p class="phase-desc">How instalment plans renew, the patient re-confirmation process, and the 12-month hard limit.</p>
+<div class="diagram-wrap">
+<pre class="mermaid">
+flowchart TD
+  A["Patient approaching<br>final month of<br>instalment plan"]:::pathB
+  A --> B["System sends reminder<br>at <b>month X-1</b><br>(e.g. month 2 of 3):<br>'Log in to manage<br>your next order'"]
+  B --> C["Patient logs into<br>their account"]
+  C --> D["System displays their<br><b>latest consultation<br>form answers</b><br>for review"]
+  D --> E["Patient must tick<br>confirmation boxes:"]
+  E --> E1["&#9745; I confirm my answers<br>are still accurate"]
+  E1 --> E2["&#9745; Nothing has changed<br>in my medical history"]
+  E2 --> E3["&#9745; I consent to inform<br>Viva proactively<br>if anything changes"]
+  E3 --> F{"Does patient<br>want to renew?"}
+  F -->|YES| G{"Within 12-month<br>hard limit?"}
+  G -->|YES| H["New instalment plan starts"]:::pathB
+  H --> I["Payment taken for<br>first month of<br>new plan"]
+  I --> J["Pharmacy team processes<br>(no prescriber review —<br>clearly labelled as<br>renewal instalment)"]:::greenNode
+  J --> K["→ Phase 11: Dispatch"]:::nextPhase
+  G -->|"NO — 12 months reached"| L["<b>12-MONTH HARD LIMIT</b><br>Answers cleared —<br>full new consultation<br>required"]:::orangeNode
+  L --> M["Patient directed to<br>→ Phase 1"]:::nextPhase
+  F -->|NO| N["Plan ends —<br>patient can reorder<br>within grace period"]:::greenNode
+  N --> GRACE{"Reorder within<br>grace period?<br>(plan duration + 1 month)"}
+  GRACE -->|YES| REORD["Patient re-confirms<br>answers → new order<br>or new plan"]:::pathB
+  REORD --> K
+  GRACE -->|"NO — grace period<br>expired"| EXPIRED["<b>ANSWERS EXPIRED</b><br>All consultation data<br>cleared — patient must<br>start fresh"]:::orangeNode
+  EXPIRED --> M
+
+  classDef pathB fill:#f3eeff,stroke:#a78bfa,color:#3b1f5e,stroke-width:2px
+  classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
+  classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
+  classDef nextPhase fill:#1e3a5f,stroke:#60a5fa,color:#fff
+</pre>
+</div>
+<div class="annotation">
+<h3>Annotation</h3>
+<h4>Renewal process</h4>
+<ul>
+<li>At month X-1 of the plan (e.g. month 2 of 3), patient receives email + in-app notification</li>
+<li>Patient logs in and is shown their <strong>original consultation answers</strong></li>
+<li>They must tick <strong>three confirmation boxes</strong> — this is their re-consent</li>
+<li>If they confirm, a new instalment plan starts and payment is taken</li>
+</ul>
+<h4>Pharmacy team processing (no prescriber review)</h4>
+<ul>
+<li>Renewal instalments go <strong>directly to the pharmacy team</strong> — not back to the prescriber</li>
+<li>Clearly labelled in the dispatch queue: <span class="badge badge-purple">Renewal — Instalment Plan 2 (X months)</span></li>
+<li>Pharmacy team can see at a glance:
+  <ul>
+  <li><strong>Plan number:</strong> which plan this is (e.g. Plan 2, Plan 3)</li>
+  <li><strong>Total treatment duration:</strong> cumulative months since original consultation</li>
+  <li><strong>Previous plan still active?</strong> If yes, flagged in <span class="warn">amber</span> — the patient triggered a renewal before their last plan finished, so the team should check the overlap is appropriate before dispatching</li>
+  <li><strong>Instalment X of Y:</strong> where in the current plan this dispatch falls</li>
+  </ul>
+</li>
+<li>Pharmacy team processes and dispatches as normal — but the overlap flag ensures they consciously acknowledge it</li>
+</ul>
+<h4>12-month hard limit</h4>
+<ul>
+<li><span class="warn">12 months is the absolute maximum</span> for continuous treatment without a fresh consultation</li>
+<li>This is a hard system block — the patient cannot renew past this point</li>
+<li>After 12 months, all consultation answers are <strong>cleared</strong> — full new consultation required (Phase 1), going through the full review cycle again</li>
+</ul>
+<h4>Answer expiry (grace period)</h4>
+<ul>
+<li>After any plan ends (or a one-off order completes), the patient has a <strong>grace period to reorder</strong> without redoing the consultation</li>
+<li>Grace period = <span class="warn">plan/order duration + 1 month</span> (e.g. 3-month plan = 4-month grace, 6-month plan = 7-month grace, one-off = 1-month grace)</li>
+<li>If the grace period passes, the system <strong>clears all stored consultation answers</strong></li>
+<li>The patient must then complete a fresh consultation from scratch (Phase 1)</li>
+<li>This applies to both one-off and instalment patients — the clock starts from the date of the last dispatched order</li>
+<li>Grace period should be <strong>configurable per product</strong> so it can be adjusted in future</li>
+</ul>
+<h4>Example timeline: 3-month plans</h4>
+<div class="table-wrap">
+<table class="ref-table">
+<tr><th>Month</th><th>What happens</th></tr>
+<tr><td>1</td><td>Initial order — consultation, review, Rx, dispatch (Instalment 1/3)</td></tr>
+<tr><td>2</td><td>Auto-dispatch by pharmacy (Instalment 2/3). Patient reminded to re-confirm.</td></tr>
+<tr><td>3</td><td>Auto-dispatch (Instalment 3/3). Plan complete.</td></tr>
+<tr><td>3 (end)</td><td>Patient renews: reviews answers, ticks boxes, pays → new plan starts</td></tr>
+<tr><td>4–6</td><td>Second plan runs (Instalment 1/3, 2/3, 3/3)</td></tr>
+<tr><td>7–9</td><td>Third plan (if renewed)</td></tr>
+<tr><td>10–12</td><td>Fourth plan (if renewed)</td></tr>
+<tr><td>12+</td><td><span class="warn">HARD LIMIT — answers cleared, full new consultation required</span></td></tr>
+<tr><td colspan="2" style="padding-top:12px;"><strong>Grace period rule (applies to all orders):</strong></td></tr>
+<tr><td>Within grace period<br>(plan duration + 1mo)</td><td>Patient can reorder (re-confirm answers, no new consultation)</td></tr>
+<tr><td>Grace period expired</td><td><span class="warn">Answers expired &amp; cleared — fresh consultation required</span></td></tr>
+</table>
+</div>
+</div>
+
+<div class="phase-nav">
+  <a href="phase-12-post-dispatch.html" class="">&larr; Phase 12: Post-Dispatch & Delivery</a>
+  <a href="error-paths.html" class="">Error / Exception Paths &rarr;</a>
+</div>
+</main>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: "default", securityLevel: "loose", flowchart: { curve: "basis", padding: 20, nodeSpacing: 30, rankSpacing: 40, htmlLabels: true }, themeVariables: { fontSize: "13px" } });
+</script>
+</body>
+</html>

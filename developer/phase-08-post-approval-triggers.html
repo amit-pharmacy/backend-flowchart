@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viva — Phase 8: Post-Approval Triggers</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<style>* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e0e0e0; }
+header { background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+header h1 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+header .subtitle { font-size: 12px; color: #666; margin-top: 2px; }
+header .dev-badge { display: inline-block; background: #065f46; color: #34d399; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 4px; margin-left: 12px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; }
+.back-link { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
+.pdf-btn { background: #22253a; border: 1px solid #3a3d4a; color: #e0e0e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; }
+.pdf-btn:hover { background: #2a3a5a; border-color: #60a5fa; color: #fff; }
+main { max-width: 1200px; margin: 0 auto; padding: 30px 40px 60px; }
+h2 { font-size: 22px; font-weight: 700; color: #fff; }
+.phase-desc { font-size: 14px; color: #888; margin-bottom: 24px; line-height: 1.5; }
+.phase-desc strong { color: #b0b0b0; }
+.phase-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 12px; }
+.diagram-wrap { background: #fff; border-radius: 12px; padding: 30px; margin-bottom: 24px; overflow-x: auto; cursor: grab; position: relative; }
+.diagram-wrap:active { cursor: grabbing; }
+.diagram-wrap svg { max-width: 100%; height: auto; }
+.diagram-wrap .zoom-hint { position: absolute; top: 10px; right: 14px; font-size: 11px; color: #999; background: #f5f5f5; padding: 3px 10px; border-radius: 4px; }
+.annotation { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.annotation h3 { font-size: 14px; font-weight: 700; color: #60a5fa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.annotation h4 { font-size: 13px; font-weight: 700; color: #e0e0e0; margin: 16px 0 6px; }
+.annotation p, .annotation li { font-size: 13px; color: #b0b0b0; line-height: 1.7; }
+.annotation ul { padding-left: 18px; }
+.annotation li { margin-bottom: 4px; }
+.annotation .highlight { color: #fbbf24; font-weight: 600; }
+.annotation .warn { color: #f87171; font-weight: 600; }
+.sub-phase-label { display: inline-block; background: #1e3a5f; color: #60a5fa; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 6px; margin: 24px 0 12px; letter-spacing: 0.5px; }
+.sub-phase-label.variant-b { background: #3b1f5e; color: #a78bfa; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+.ref-table th { background: #22253a; color: #60a5fa; text-align: left; padding: 10px 14px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+.ref-table td { padding: 10px 14px; border-bottom: 1px solid #2a2d3a; color: #b0b0b0; }
+.ref-table tr:hover td { background: #1e2a4a22; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge-green { background: #065f4620; color: #34d399; }
+.badge-red { background: #7f1d1d20; color: #f87171; }
+.badge-orange { background: #78350f20; color: #fbbf24; }
+.badge-blue { background: #1e3a5f40; color: #60a5fa; }
+.badge-purple { background: #3b1f5e40; color: #a78bfa; }
+.phase-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-top: 20px; border-top: 1px solid #2a2d3a; }
+.phase-nav a { color: #60a5fa; text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 6px; border: 1px solid #2a2d3a; background: #1a1d27; transition: all 0.15s; }
+.phase-nav a:hover { background: #22253a; border-color: #60a5fa; }
+.phase-nav .disabled { opacity: 0.3; pointer-events: none; }
+@media (max-width: 768px) { header { padding: 16px 20px; } main { padding: 20px 16px 60px; } .diagram-wrap { padding: 16px; border-radius: 8px; } .diagram-wrap svg { max-width: none; min-width: 400px; } .annotation { padding: 16px; border-radius: 8px; } }</style>
+</head>
+<body>
+<div id="authGate" style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#0f1117;position:fixed;top:0;left:0;z-index:9999;"><div style="text-align:center;max-width:360px;width:90%;"><div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:1px;">VIVA</div><div style="font-size:12px;color:#666;margin-bottom:32px;">Pharmacy Backend Flowchart</div><form id="authForm" onsubmit="return checkAuth(event)"><input id="authPass" type="password" placeholder="Enter password" autofocus style="width:100%;padding:14px 18px;border-radius:8px;border:1px solid #2a2d3a;background:#1a1d27;color:#e0e0e0;font-size:14px;outline:none;margin-bottom:12px;"><button type="submit" style="width:100%;padding:12px;border-radius:8px;border:none;background:#60a5fa;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Unlock</button></form><div id="authError" style="color:#f87171;font-size:13px;margin-top:12px;display:none;">Incorrect password</div></div></div>
+<script>
+async function sha256(str){const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+const HASH="7ab62e107f337d84178fb05138499c20ff2445cd35d4ca5f57295666e09b568d";
+if(sessionStorage.getItem("viva_auth")==="1"){document.getElementById("authGate").style.display="none";}
+async function checkAuth(e){e.preventDefault();const h=await sha256(document.getElementById("authPass").value);if(h===HASH){sessionStorage.setItem("viva_auth","1");document.getElementById("authGate").style.display="none";}else{document.getElementById("authError").style.display="block";document.getElementById("authPass").value="";}}
+</script>
+<header>
+  <div>
+    <h1>VIVA <span class="dev-badge">Developer</span></h1>
+    <div class="subtitle">Phase 8: Post-Approval Triggers</div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <a href="index.html" class="back-link">&larr; All Phases</a>
+    <button class="pdf-btn" onclick="window.print()">&#128196; Print / PDF</button>
+  </div>
+</header>
+<main>
+
+
+<p class="phase-desc">When the Rx is signed (POM) or pharmacist approves (P item), the SignatureRx webhook or approval event automatically triggers three parallel actions — all at the same time.</p>
+<div class="diagram-wrap">
+<pre class="mermaid">
+flowchart TD
+  A["SignatureRx signed webhook<br>(or pharmacist approval event)"]:::apiIn
+  A --> B["Website backend processes<br>signed Rx / approval"]
+  B --> C["<b>THREE AUTOMATED TRIGGERS</b><br>fire simultaneously:"]
+
+  C --> D["&#9993; <b>1. GP LETTER</b><br>Auto-generated PDF +<br>emailed to GP"]:::trigger
+  C --> E["&#9993; <b>2. PATIENT MESSAGE</b><br>'Your prescription has been<br>approved and is now<br>with the pharmacy'"]:::trigger
+  C --> F["&#9881; <b>3. PHARMACY NOTIFICATION</b><br>Order enters processing<br>queue in backend<br>(labelled: one-off<br>or instalment X of Y)"]:::trigger
+
+  D --> D2{"GP email<br>available?"}
+  D2 -->|YES| D3["Auto-email GP letter"]:::greenNode
+  D2 -->|NO| D4["Flag: GP Email Missing<br>Team can input later"]:::orangeNode
+  D3 --> D5{"Bounced?"}
+  D5 -->|NO| D6["&#9989; GP letter sent"]:::greenNode
+  D5 -->|YES| D7["Flag: GP Email Failed<br>Team corrects email"]:::orangeNode
+
+  E --> E2["Email + in-app message<br>to patient account"]:::greenNode
+
+  F --> F2["Order visible in<br>dispatch queue"]:::greenNode
+
+  classDef apiIn fill:#f0e6ff,stroke:#a78bfa,color:#4c1d95,stroke-width:2px,stroke-dasharray: 5 5
+  classDef trigger fill:#1e3a5f,stroke:#60a5fa,color:#fff,stroke-width:2px
+  classDef greenNode fill:#f0fdf4,stroke:#34d399,color:#065f46,stroke-width:2px
+  classDef orangeNode fill:#fffbeb,stroke:#fbbf24,color:#78350f,stroke-width:2px
+</pre>
+</div>
+<div class="annotation">
+<h3>Annotation</h3>
+<h4>Why GP letter fires on signing (not dispatch)</h4>
+<ul>
+<li>The GP is notified <span class="highlight">as soon as the prescription is signed</span> — before dispatch</li>
+<li>This gives the GP time to flag concerns or contact the patient/pharmacy <em>before</em> the medication is shipped</li>
+<li>This is a safety measure — the GP should be aware at the earliest possible moment</li>
+</ul>
+<h4>GP letter content</h4>
+<ul>
+<li>Patient name, DOB, medication prescribed/supplied, date, prescriber/pharmacist details</li>
+<li>Generated for <strong>ALL approved orders</strong> — both POM and P items</li>
+<li>GP email send status: <span class="badge badge-green">Sent</span> <span class="badge badge-red">Failed</span> <span class="badge badge-orange">Pending</span> <span class="badge badge-blue">Not Collected</span></li>
+<li>Clinical team always has a manual field to enter/correct GP email</li>
+</ul>
+<h4>Patient notification</h4>
+<ul>
+<li>Patient receives both an <strong>email</strong> and an <strong>in-app message</strong></li>
+<li>Confirms: what was prescribed, that it's with the pharmacy, and they'll get a dispatch email with tracking</li>
+</ul>
+<h4>Pharmacy notification</h4>
+<ul>
+<li>Order appears in the processing/dispatch queue</li>
+<li>Clearly labelled: <span class="badge badge-blue">One-Off</span> or <span class="badge badge-purple">Instalment 1 of 3</span></li>
+<li>All gate checks visible (ID, approval, Rx, payment)</li>
+</ul>
+</div>
+
+<div class="phase-nav">
+  <a href="phase-07-rx-esigning.html" class="">&larr; Phase 7: Rx Generation & E-Signing (7A / 7B)</a>
+  <a href="phase-09-pmr-print-slip.html" class="">Phase 9: PMR Integration & Print Slip &rarr;</a>
+</div>
+</main>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: "default", securityLevel: "loose", flowchart: { curve: "basis", padding: 20, nodeSpacing: 30, rankSpacing: 40, htmlLabels: true }, themeVariables: { fontSize: "13px" } });
+</script>
+</body>
+</html>
